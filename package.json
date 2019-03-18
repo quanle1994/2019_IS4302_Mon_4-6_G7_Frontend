@@ -1,8 +1,11 @@
 {
   "name": "gold-chain-react",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "dependencies": {
+    "express": "^4.16.4",
+    "express-http-proxy": "^1.5.1",
+    "jsonwebtoken": "^8.5.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-scripts": "2.1.8"
