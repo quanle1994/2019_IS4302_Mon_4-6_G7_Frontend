@@ -1,0 +1,14 @@
+#paymentForm > label {
+    display: block;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 13px;
+    margin-bottom: 30px;
+}
+
+#paymentForm > label > div {
+    margin-top: 5px;
+}
+
+#paymentForm {
+    margin-top: 15px;
+}
