@@ -20,7 +20,7 @@ import history from '../history';
 import CartViewer from './CartViewer';
 import { OPEN_CART_VIEWER } from '../reducers/cartReducer';
 import { UPDATE_PRODUCT_FILTER } from '../reducers/productsReducer';
-import {SET_CURRENT_PAGE} from "../reducers/currentPageReducer";
+import { SET_CURRENT_PAGE } from '../reducers/currentPageReducer';
 
 const styles = theme => ({
   root: {
@@ -164,6 +164,9 @@ class Searchbar extends React.Component {
     };
     const items = Object.values(cartItems).map(obj => obj.quantity).reduce((a, b) => a + b, 0);
     const tabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
+    const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
+    const minerTabs = ['Browse All Gold', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
+    const caTabs = ['Browse All Gold', 'Verification Requests', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
     const tTabs = tabs.map(tab => tab.split(' ').join('_').toLowerCase());
     const pos = tTabs.indexOf(currentPage);
     if (value !== pos) this.setState({ value: pos });

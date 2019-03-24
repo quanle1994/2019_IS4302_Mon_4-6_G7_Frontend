@@ -24,21 +24,21 @@ class ProductCarousel extends React.Component {
       currentPage: 'browse_all_gold',
       products: [],
     }));
-    listingsApi.getAllListings().then((response) => {
-      const products = response.data;
-      const catMapping = {};
-      // products.forEach((a) => {
-      //   // const init = _catMapping[a.category];
-      //   catMapping[a.category] = catMapping[a.category] === undefined ? [] : catMapping[a.category];
-      //   catMapping[a.category].push(a);
-      // });
-      // this.setState({}, () => dispatch({
-      //   type: GET_ALL_PRODUCTS,
-      //   products,
-      //   catMapping,
-      //   cats: products.map(p => p.category),
-      // }));
-    }).catch(error => ErrorDialog('getting all products', error));
+    // listingsApi.getAllListings().then((response) => {
+    //   const products = response.data;
+    //   const catMapping = {};
+    // products.forEach((a) => {
+    //   // const init = _catMapping[a.category];
+    //   catMapping[a.category] = catMapping[a.category] === undefined ? [] : catMapping[a.category];
+    //   catMapping[a.category].push(a);
+    // });
+    // this.setState({}, () => dispatch({
+    //   type: GET_ALL_PRODUCTS,
+    //   products,
+    //   catMapping,
+    //   cats: products.map(p => p.category),
+    // }));
+    // }).catch(error => ErrorDialog('getting all products', error));
     if (this.props.match === undefined) return;
     const { pId, cId } = this.props.match.params;
     if (pId !== undefined && cId !== undefined) {
@@ -71,6 +71,7 @@ class ProductCarousel extends React.Component {
     return (
       <div className={classes.container}>
         <div>
+          <img alt="test" src="/getPhoto" />
           {filteredCats.map(cat => (
             <div className={classes.catWrapper}>
               <Typography variant="h6">{cat}</Typography>
