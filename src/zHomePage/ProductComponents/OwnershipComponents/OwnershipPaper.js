@@ -21,7 +21,6 @@ class OwnershipPaper extends React.Component {
 
   componentWillMount() {
     sellerApi.getAllAssets().then((res) => {
-      console.log(res.data);
       this.setState({ ...res.data });
     }).catch(e => console.log(e));
   }
@@ -33,7 +32,7 @@ class OwnershipPaper extends React.Component {
     return (
       <Paper className={classes.ownership}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'row' }}>
-          <Typography variant="h4" style={{ paddingRight: 30 }}>Your Assets</Typography>
+          <Typography variant="h4" style={{ paddingRight: 30, color: '#E84A5F' }}>Your Assets</Typography>
           <TextField
             type="String"
             value={convert(money.balance)}
@@ -64,7 +63,7 @@ const style = () => ({
   },
   section: {
     width: '100%',
-    height: '50%',
+    height: '43.5%',
     paddingTop: 10,
   },
 });
