@@ -3,26 +3,13 @@ import React from 'react';
 import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
-import ExpansionPanel from '@material-ui/core/ExpansionPanel/ExpansionPanel';
-import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary/ExpansionPanelSummary';
-import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import SearchIcon from '@material-ui/icons/Search';
-import InputBase from '@material-ui/core/InputBase/InputBase';
-import { fade } from '@material-ui/core/styles/colorManipulator';
-import classNames from 'classnames';
-import 'simplebar';
-import 'simplebar/dist/simplebar.css';
-import Badge from '@material-ui/core/Badge/Badge';
 import { Paper, TableHead, TextField } from '@material-ui/core';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import Checkbox from '@material-ui/core/Checkbox';
-import Input from '@material-ui/core/Input';
-import history from '../history';
 
 class SideBar extends React.Component {
   constructor(props) {
@@ -95,9 +82,9 @@ const style = theme => ({
   container: {
     height: '100%',
     width: '100%',
-    // backgroundColor: '#2A363B',
     paddingTop: 10,
     paddingLeft: 10,
+    paddingRight: 10,
   },
   paper: {
     marginTop: 10,

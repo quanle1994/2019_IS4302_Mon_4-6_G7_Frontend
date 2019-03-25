@@ -163,10 +163,12 @@ class Searchbar extends React.Component {
       });
     };
     const items = Object.values(cartItems).map(obj => obj.quantity).reduce((a, b) => a + b, 0);
-    const tabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
-    const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
-    const minerTabs = ['Browse All Gold', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
-    const caTabs = ['Browse All Gold', 'Verification Requests', 'Our Mines', 'Verified Sellers', 'About Us', 'Promotions'];
+    const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Verified Sellers', 'About Us'];
+    const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Verified Sellers', 'About Us'];
+    const minerTabs = ['Browse All Gold', 'Our Mines', 'Verified Sellers', 'About Us'];
+    const caTabs = ['Browse All Gold', 'Verification Requests', 'Our Mines', 'Verified Sellers', 'About Us'];
+    const type = localStorage.getItem('type');
+    const tabs = type === 'ADMIN' ? adminTabs : type === 'MINER' ? minerTabs : type === 'CA' ? caTabs : publicTabs;
     const tTabs = tabs.map(tab => tab.split(' ').join('_').toLowerCase());
     const pos = tTabs.indexOf(currentPage);
     if (value !== pos) this.setState({ value: pos });
@@ -175,12 +177,13 @@ class Searchbar extends React.Component {
       const url = tabs[val].split(' ').join('_').toLowerCase();
       handlePageOpen(url);
     };
+    const username = localStorage.getItem('username');
     return (
       <div className={classes.root}>
         <AppBar position="static">
           <Toolbar className={classes.toolbar}>
             <Typography className={classes.title} variant="h5" color="inherit" noWrap>
-              WELCOME TO GOLD CHAIN
+              {username === null ? 'WELCOME TO GOLD CHAIN' : `Hi ${username}! Welcome back to GOLD CHAIN!`}
             </Typography>
             <div className={classes.grow} />
             <div className={classes.search}>
@@ -209,7 +212,7 @@ class Searchbar extends React.Component {
                   />
                 </div>
               )}
-              {currentUser.type === 'BUYER' && (
+              {currentUser.type === 'COMMERCIAL' && (
                 <div>
                   <CartViewer />
                   <IconButton color="inherit">
@@ -219,14 +222,16 @@ class Searchbar extends React.Component {
                   </IconButton>
                 </div>
               )}
-              <IconButton
-                aria-owns="material-appbar"
-                aria-haspopup="true"
-                color="inherit"
-                onClick={() => handlePageOpen('shopping_cart')}
-              >
-                <ShoppingCart />
-              </IconButton>
+              {false && (
+                <IconButton
+                  aria-owns="material-appbar"
+                  aria-haspopup="true"
+                  color="inherit"
+                  onClick={() => handlePageOpen('shopping_cart')}
+                >
+                  <ShoppingCart />
+                </IconButton>
+              )}
               <IconButton
                 aria-owns="material-appbar"
                 aria-haspopup="true"

@@ -3,7 +3,7 @@ import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
 import { Redirect, Route, Router } from 'react-router';
-import SideBar from './SideBar';
+import SideBar from './ProductComponents/SideBar';
 import history from '../history';
 import AdminPage from '../zAdminPage/AdminPage';
 import ProductCarousel from './ProductComponents/ProductCarousel';
@@ -18,6 +18,10 @@ import ProductViewer from './ProductComponents/ProductViewer';
 import SellerProductsPage from '../zSellerProductsPage/SellerProductsPage';
 import ProductEditDialog from '../zSellerProductsPage/ProductEditDialog';
 import ProductCreateDialog from '../zSellerProductsPage/ProductCreateDialog';
+import MineCatalogue from './MineComponents/MineCatalogue';
+import VerificationRequests from './VerificationRequests/VerificationRequests';
+import AboutUs from './AboutUsComponents/AboutUs';
+import VerifiedSellers from './VerifiedSellersComponents/VerifiedSellers';
 
 class ProductsPage extends React.Component {
   constructor(props) {
@@ -27,7 +31,7 @@ class ProductsPage extends React.Component {
 
   componentWillMount() {
     const { dispatch } = this.props;
-    if (localStorage.getItem('user') !== 'null' || localStorage.getItem('token') !== null) {
+    if (localStorage.getItem('user') !== 'null' || localStorage.getItem('auth') !== null) {
       dispatch({
         type: SET_CURRENT_USER,
         currentUser: JSON.parse(localStorage.getItem('user')),
@@ -46,85 +50,86 @@ class ProductsPage extends React.Component {
     const { classes } = this.props;
     return (
       <div className={classes.container}>
-        <div className={classes.sidebar}>
-          <SideBar />
-        </div>
-        <div className={classes.content}>
-          <UserRegistration />
-          <ChangePasswordDialog />
-          <PaymentDialog />
-          <ProductViewer />
-          <ProductEditDialog />
-          <ProductCreateDialog />
-          <Router history={history}>
-            <div>
-              <Route
-                exact
-                path="/admin"
-                render={() => (
-                  localStorage.getItem('type') === 'ADMIN'
-                    ? <AdminPage />
-                    : <Redirect to={{ pathname: '/' }} />
-                  // : <Redirect to={{ pathname: '/' }} />
-                )}
-              />
-              <Route
-                exact
-                path="/register"
-                render={() => (
-                  localStorage.getItem('token') !== null ? <Redirect to={{ pathname: '/' }} /> : <ProductCarousel register />
-                )}
-              />
-              <Route
-                exact
-                path="/cart"
-                render={() => (
-                  localStorage.getItem('type') !== 'BUYER' ? <Redirect to={{ pathname: '/' }} /> : <CartPage />
-                )}
-              />
-              <Route
-                exact
-                path="/payment"
-                render={() => (
-                  localStorage.getItem('type') !== 'BUYER' ? <Redirect to={{ pathname: '/' }} /> : <CartPage payment />
-                )}
-              />
-              <Route
-                exact
-                path="/products"
-                render={() => (
-                  localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} /> : <SellerProductsPage />
-                )}
-              />
-              <Route
-                exact
-                path="/products/create"
-                render={({ match }) => (
-                  localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} />
-                    : <SellerProductsPage create match={match} />
-                )}
-              />
-              <Route
-                exact
-                path="/products/edit/:pId"
-                render={({ match }) => (
-                  localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} />
-                    : <SellerProductsPage edit match={match} />
-                )}
-              />
-              <Route
-                exact
-                path="/orders"
-                render={() => (
-                  localStorage.getItem('token') === null ? <Redirect to={{ pathname: '/' }} /> : <OrderPage />
-                )}
-              />
-              <Route exact path="/" component={ProductCarousel} />
-              <Route path="/view/:pId" component={ProductCarousel} />
-              <Route path="/feedback/:pId/:cId" render={({ match }) => <ProductCarousel feedback match={match} />} />
-            </div>
-          </Router>
-        </div>
+        <UserRegistration />
+        <ChangePasswordDialog />
+        <PaymentDialog />
+        <ProductViewer />
+        <ProductEditDialog />
+        <ProductCreateDialog />
+        <Router history={history}>
+          <div style={{ height: '100%', width: '100%', overflowX: 'auto', overflowY: 'auto' }}>
+            <Route
+              exact
+              path="/join_requests"
+              render={() => (
+                localStorage.getItem('type') === 'ADMIN'
+                  ? <AdminPage />
+                  : <Redirect to={{ pathname: '/' }} />
+                // : <Redirect to={{ pathname: '/' }} />
+              )}
+            />
+            <Route
+              exact
+              path="/register"
+              render={() => (
+                localStorage.getItem('token') !== null ? <Redirect to={{ pathname: '/' }} /> : <ProductCarousel register />
+              )}
+            />
+            <Route
+              exact
+              path="/cart"
+              render={() => (
+                localStorage.getItem('type') !== 'BUYER' ? <Redirect to={{ pathname: '/' }} /> : <CartPage />
+              )}
+            />
+            <Route
+              exact
+              path="/payment"
+              render={() => (
+                localStorage.getItem('type') !== 'BUYER' ? <Redirect to={{ pathname: '/' }} /> : <CartPage payment />
+              )}
+            />
+            <Route
+              exact
+              path="/products"
+              render={() => (
+                localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} /> : <SellerProductsPage />
+              )}
+            />
+            <Route
+              exact
+              path="/products/create"
+              render={({ match }) => (
+                localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} />
+                  : <SellerProductsPage create match={match} />
+              )}
+            />
+            <Route
+              exact
+              path="/products/edit/:pId"
+              render={({ match }) => (
+                localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} />
+                  : <SellerProductsPage edit match={match} />
+              )}
+            />
+            <Route
+              exact
+              path="/orders"
+              render={() => (
+                localStorage.getItem('token') === null ? <Redirect to={{ pathname: '/' }} /> : <OrderPage />
+              )}
+            />
+            <Route exact path="/" component={ProductCarousel} />
+            <Route exact path="/browse_all_gold" component={ProductCarousel} />
+            <Route exact path="/our_mines" component={MineCatalogue} />
+            <Route exact path="/verification_requests" component={VerificationRequests} />
+            <Route exact path="/verified_sellers" component={VerifiedSellers} />
+            <Route exact path="/about_us" component={AboutUs} />
+            <Route exact path="/shopping_cart" component={CartPage} />
+            <Route path="/view/:pId" component={ProductCarousel} />
+            <Route path="/feedback/:pId/:cId" render={({ match }) => <ProductCarousel feedback match={match} />} />
+          </div>
+        </Router>
       </div>
     );
   }
@@ -137,15 +142,11 @@ const style = () => ({
     display: 'flex',
     flexDirection: 'row',
   },
-  sidebar: {
-    height: '100%',
-    width: '22vw',
-  },
   content: {
     flex: 1,
     height: '100%',
     overflowY: 'auto',
-    padding: 20,
+    padding: 10,
     boxSizing: 'border-box',
   },
   full: {

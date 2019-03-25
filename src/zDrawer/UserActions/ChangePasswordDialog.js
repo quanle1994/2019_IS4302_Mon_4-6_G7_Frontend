@@ -8,7 +8,6 @@ import TextField from '@material-ui/core/TextField/TextField';
 import DialogActions from '@material-ui/core/DialogActions/DialogActions';
 import Button from '@material-ui/core/Button/Button';
 import Dialog from '@material-ui/core/Dialog/Dialog';
-import { CLOSE_REGISTRATION_FORM } from './UserRegistration';
 import ErrorDialog from '../../commons/ErrorDialog';
 import SuccessDialog from '../../commons/SuccessDialog';
 import InvalidationDialog from '../../commons/InvalidationDialog';
@@ -57,7 +56,7 @@ class ChangePasswordDialog extends React.Component {
     };
     return (
       <Dialog
-        open={changePasswordOpen}
+        open={changePasswordOpen === undefined ? false : changePasswordOpen}
         onClose={this.handleCloseForm}
       >
         <DialogTitle>Change Password</DialogTitle>

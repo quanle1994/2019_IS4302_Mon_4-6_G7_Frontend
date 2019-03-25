@@ -1,10 +1,7 @@
 import axios from 'axios';
-import BACKEND_SERVER from './constants';
-
-const BASE_URL = `${BACKEND_SERVER}/auth/Admin`;
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: '/admin',
   responseType: 'json',
   timeout: 10000,
   contentType: 'application/json',
@@ -13,7 +10,7 @@ const api = axios.create({
 const getAllUsers = () => api
   .get(
     '/getAllUsers',
-    { headers: { Authorisation: localStorage.getItem('token') } },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
 const toggleActivity = (id) => api

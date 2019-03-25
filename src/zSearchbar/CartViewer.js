@@ -26,10 +26,10 @@ class CartViewer extends React.Component {
 
   handleOpenCartPage = () => {
     const { dispatch } = this.props;
-    history.push('/cart');
+    history.push('/shopping_cart');
     dispatch({
       type: SET_CURRENT_PAGE,
-      currentPage: 'cartPage',
+      currentPage: 'shopping_cart',
     });
   };
 

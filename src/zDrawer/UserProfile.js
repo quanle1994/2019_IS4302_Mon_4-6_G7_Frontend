@@ -7,13 +7,12 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import Typography from '@material-ui/core/Typography/Typography';
 import TextField from '@material-ui/core/TextField/TextField';
 import Button from '@material-ui/core/Button/Button';
+import MenuItem from '@material-ui/core/MenuItem/MenuItem';
 import SuccessDialog from '../commons/SuccessDialog';
-import {CLOSE_LEFT_DRAWER, SET_CURRENT_USER} from './SideDrawer';
+import { CLOSE_LEFT_DRAWER, SET_CURRENT_USER } from './SideDrawer';
 import history from '../history';
-import MenuItem from "@material-ui/core/MenuItem/MenuItem";
-import ErrorDialog from "../commons/ErrorDialog";
-import loginApi from "../api/login";
-import buyerApi from "../api/buyer";
+import ErrorDialog from '../commons/ErrorDialog';
+import loginApi from '../api/login';
 
 export const REMOVE_CURRENT_USER = 'REMOVE_CURRENT_USER';
 export const OPEN_CHANGE_PASSWORD_FORM = 'OPEN_CHANGE_PASSWORD_FORM';
@@ -70,15 +69,19 @@ class UserProfile extends React.Component {
   };
 
   handleUpdateUser = () => {
-    const { id, username, fullname, emailAddress, address, gender, dob } = this.state;
-    const updateReq = { id, username, fullname, emailAddress, address, gender, dob };
+    const {
+      id, username, fullname, emailAddress, address, gender, dob,
+    } = this.state;
+    const updateReq = {
+      id, username, fullname, emailAddress, address, gender, dob,
+    };
     loginApi.updateUser(updateReq).then((response) => {
       this.handleSetCurrentUser(response.data);
       SuccessDialog('Update User Successfully', 'User Profile', 'updated');
     }).catch(error => ErrorDialog('updating user profile', error));
   };
 
-  handleChange = (e)=> {
+  handleChange = (e) => {
     this.setState({
       [e.target.name]: e.target.value,
     });
@@ -87,27 +90,26 @@ class UserProfile extends React.Component {
   render() {
     const { classes, dispatch, currentUser } = this.props;
     const handleLogout = () => {
-      buyerApi.logout(currentUser.id, localStorage.getItem('cart')).then(() => {
-        SuccessDialog('Logout', `User ${localStorage.getItem('username')}`, 'logged out');
-        history.push('/');
+      SuccessDialog('Logout', `User ${localStorage.getItem('username')}`, 'logged out');
+      history.push('/');
+      dispatch({
+        type: REMOVE_CURRENT_USER,
+      });
+      localStorage.clear();
+      setTimeout(() => {
         dispatch({
-          type: REMOVE_CURRENT_USER,
+          type: CLOSE_LEFT_DRAWER,
         });
-        localStorage.clear();
-        setTimeout(() => {
-          dispatch({
-            type: CLOSE_LEFT_DRAWER,
-          });
-          // window.location.reload();
-        }, 500);
-      }).catch(error => ErrorDialog('logging out', error));
+        // window.location.reload();
+      }, 500);
     };
     const handleChangePassword = () => dispatch({
       type: OPEN_CHANGE_PASSWORD_FORM,
     });
+    const type = localStorage.getItem('type');
     return (
       <div className={classes.container}>
-        {currentUser.photoDir === null ? (
+        {currentUser.photoDir === null || currentUser.photoDir === undefined ? (
           <AccountCircle className={classes.icon} />
         ) : (
           <img alt="profile" src={currentUser.photoDir} />
@@ -116,51 +118,41 @@ class UserProfile extends React.Component {
           User Profile
         </Typography>
         <TextField
-          required
           fullWidth
           className={classes.input}
-          label="User Name"
+          label="Email / User Name"
           type="text"
           defaultValue={currentUser.username}
-          name="username"
+          name="emailAddress"
           value={this.state.username}
-          onChange={this.handleChange}
+          InputProps={{ readOnly: true }}
         />
         <TextField
           required
           fullWidth
           className={classes.input}
-          label="Full Name"
+          label={type === 'COMMERCIAL' || type === 'ADMIN' ? 'Full Name' : 'Company\'s Name'}
           type="text"
           defaultValue={currentUser.fullname}
           name="fullname"
           value={this.state.fullname}
           onChange={this.handleChange}
         />
-        <TextField
-          required
-          fullWidth
-          select
-          className={classes.input}
-          label="Gender"
-          name="gender"
-          value={this.state.gender}
-          onChange={this.handleChange}
-        >
-          <MenuItem key={0} value={0}>Male</MenuItem>
-          <MenuItem key={1} value={1}>Female</MenuItem>
-        </TextField>
-        <TextField
-          required
-          fullWidth
-          className={classes.input}
-          label="Email"
-          type="text"
-          defaultValue={currentUser.emailAddress}
-          name="emailAddress"
-          value={this.state.emailAddress}
-          onChange={this.handleChange}
-        />
+        {type === 'COMMERCIAL' && (
+          <TextField
+            required
+            fullWidth
+            select
+            className={classes.input}
+            label="Gender"
+            name="gender"
+            value={this.state.gender}
+            onChange={this.handleChange}
+          >
+            <MenuItem key={0} value={0}>Male</MenuItem>
+            <MenuItem key={1} value={1}>Female</MenuItem>
+          </TextField>
+        )}
         <TextField
           required
           fullWidth
@@ -173,23 +165,12 @@ class UserProfile extends React.Component {
           onChange={this.handleChange}
         />
         <TextField
-          required
           fullWidth
           className={classes.input}
-          label="Birthday"
-          type="date"
-          defaultValue={this.convertDateTime(currentUser.dob, true)}
-          name="dob"
-          value={this.convertDateTime(this.state.dob, true)}
-          onChange={this.handleChange}
-        />
-        <TextField
-          fullWidth
-          className={classes.input}
-          label="User Type"
+          label="Type"
           type="text"
           InputProps={{ readOnly: true }}
-          value={currentUser.type}
+          value={type === 'CA' ? 'CERTIFYING AUTHORITY' : currentUser.type}
         />
         <Button variant="outlined" color="secondary" className={classes.button} onClick={this.handleUpdateUser}>Update</Button>
         <Button variant="outlined" color="secondary" className={classes.button} onClick={handleChangePassword}>Change Password</Button>

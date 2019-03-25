@@ -22,14 +22,14 @@ class SideDrawer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
+      email: '',
       password: '',
     };
   }
 
   render() {
     const { drawerOpen, dispatch, classes } = this.props;
-    const { username, password } = this.state;
+    const { email, password } = this.state;
     const closeDrawer = () => this.setState({}, () => dispatch({
       type: CLOSE_LEFT_DRAWER,
     }));
@@ -37,26 +37,29 @@ class SideDrawer extends React.Component {
       [event.target.name]: event.target.value,
     });
     const handleLogin = () => {
-      const { username: _username, password: _password } = this.state;
+      const { email: _username, password: _password } = this.state;
       loginApi.login(_username, _password).then((response) => {
         const currentUser = response.data;
+        localStorage.setItem('auth', response.headers['x-auth']);
         localStorage.setItem('user', JSON.stringify(currentUser));
-        localStorage.setItem('id', currentUser.id);
-        localStorage.setItem('fullname', currentUser.fullname);
-        localStorage.setItem('token', `${_username}|||${_password}`);
+        // localStorage.setItem('id', currentUser.id);
+        // localStorage.setItem('fullname', currentUser.fullname);
+        // localStorage.setItem('token', `${_username}|||${_password}`);
         localStorage.setItem('photoDir', currentUser.photoDir);
         localStorage.setItem('username', currentUser.username);
         localStorage.setItem('type', currentUser.type);
-        localStorage.setItem('emailAddress', currentUser.emailAddress);
-        localStorage.setItem('gender', currentUser.gender);
-        localStorage.setItem('dob', currentUser.dob);
-        localStorage.setItem('cart', currentUser.cartString);
+        // localStorage.setItem('emailAddress', currentUser.emailAddress);
+        // localStorage.setItem('gender', currentUser.gender);
+        // localStorage.setItem('dob', currentUser.dob);
+        // localStorage.setItem('cart', currentUser.cartString);
         dispatch({
           type: SET_CURRENT_USER,
           currentUser,
         });
         setTimeout(closeDrawer, 500);
-        SuccessDialog('Logged In', `User ${username}`, 'logged in', currentUser.type === 'ADMIN' ? '/admin' : null);
+        SuccessDialog('Logged In', `User ${email}`, 'logged in',
+          currentUser.type === 'ADMIN' ? '/join_requests' : currentUser.type === 'MINER'
+            ? '/our_mines' : currentUser.type === 'CA' ? '/verification_requests' : null);
       }).catch(error => ErrorDialog('logging in', error));
     };
 
@@ -71,7 +74,7 @@ class SideDrawer extends React.Component {
             role="button"
           >
             <div className={classes.content}>
-              {localStorage.getItem('id') === null && (
+              {localStorage.getItem('username') === null && (
                 <div>
                   <AccountCircle className={classes.icon} />
                   <div className={classes.form}>
@@ -81,10 +84,10 @@ class SideDrawer extends React.Component {
                     <TextField
                       fullWidth
                       className={classes.input}
-                      label="User Name"
-                      name="username"
+                      label="Email"
+                      name="email"
                       type="text"
-                      value={username}
+                      value={email}
                       onChange={handleOnchange}
                     />
                     <TextField
@@ -104,7 +107,7 @@ class SideDrawer extends React.Component {
                   </div>
                 </div>
               )}
-              {localStorage.getItem('id') !== null && (<UserProfile />)}
+              {localStorage.getItem('username') !== null && (<UserProfile />)}
             </div>
           </div>
         </Drawer>

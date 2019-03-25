@@ -46,7 +46,7 @@ class CartPage extends React.Component {
     const { dispatch, cartItems, payment } = this.props;
     dispatch({
       type: SET_CURRENT_PAGE,
-      currentPage: 'cartPage',
+      currentPage: 'shopping_cart',
     });
     const items = Object.values(cartItems).map(obj => ({
       id: obj.product.id,

@@ -1,19 +1,16 @@
 import axios from 'axios';
-import BACKEND_SERVER from './constants';
-
-const BASE_URL = `${BACKEND_SERVER}/auth`;
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: '/user',
   responseType: 'json',
   timeout: 10000,
   contentType: 'application/json',
 });
 
 const login = (username, password) => api
-  .get(
-    '/login',
-    { params: { username, password }, headers: { Authorisation: localStorage.getItem('token') } },
+  .post(
+    '/signin',
+    { username, password },
   );
 
 const register = user => api
@@ -41,5 +38,5 @@ export default {
   login,
   register,
   changePassword,
-  updateUser
+  updateUser,
 };

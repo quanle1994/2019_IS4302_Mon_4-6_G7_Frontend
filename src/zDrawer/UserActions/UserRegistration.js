@@ -23,13 +23,11 @@ class UserRegistration extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: '',
       fullname: '',
       email: '',
       address: '',
       gender: '',
-      type: '',
-      birthday: this.convertDateTime(new Date().getTime(), true),
+      type: 2,
       password: '',
       confirmPassword: '',
     };
@@ -68,11 +66,9 @@ class UserRegistration extends React.Component {
       localStorage.setItem('fullname', currentUser.fullname);
       localStorage.setItem('token', `${username}|||${password}`);
       localStorage.setItem('photoDir', currentUser.photoDir);
-      localStorage.setItem('username', currentUser.username);
       localStorage.setItem('type', currentUser.type);
       localStorage.setItem('emailAddress', currentUser.emailAddress);
       localStorage.setItem('gender', currentUser.gender);
-      localStorage.setItem('dob', currentUser.dob);
       localStorage.setItem('cart', currentUser.cartString);
       this.setState({}, () => dispatch({
         type: SET_CURRENT_USER,
@@ -92,7 +88,7 @@ class UserRegistration extends React.Component {
 
   render() {
     const {
-      username, fullname, email, address, gender, type, birthday, password, confirmPassword,
+      fullname, email, address, gender, type, password, confirmPassword,
     } = this.state;
     const { classes, dispatch, registrationOpen } = this.props;
     const handleCloseForm = () => {
@@ -119,24 +115,6 @@ class UserRegistration extends React.Component {
             <AccountCircle className={classes.icon} />
           </div>
           <TextField
-            fullWidth
-            className={classes.inputHalfLeft}
-            label="User Name"
-            name="username"
-            type="text"
-            value={username}
-            onChange={handleChange}
-          />
-          <TextField
-            fullWidth
-            className={classes.inputHalfRight}
-            label="Full Name"
-            type="text"
-            name="fullname"
-            value={fullname}
-            onChange={handleChange}
-          />
-          <TextField
             error={emailError}
             fullWidth
             className={classes.inputHalfLeft}
@@ -149,10 +127,10 @@ class UserRegistration extends React.Component {
           <TextField
             fullWidth
             className={classes.inputHalfRight}
-            label="Birthday"
-            name="birthday"
-            type="date"
-            value={birthday}
+            label="Full Name"
+            type="text"
+            name="fullname"
+            value={fullname}
             onChange={handleChange}
           />
           <TextField
@@ -176,26 +154,29 @@ class UserRegistration extends React.Component {
           />
           <TextField
             className={classes.inputHalfLeft}
-            label="Gender"
-            select
-            name="gender"
-            value={gender}
-            onChange={handleChange}
-          >
-            <MenuItem value={0} key={0}>Male</MenuItem>
-            <MenuItem value={1} key={1}>Female</MenuItem>
-          </TextField>
-          <TextField
-            className={classes.inputHalfRight}
             label="Type"
             select
             name="type"
             value={type}
             onChange={handleChange}
           >
-            <MenuItem value={0} key={0}>SELLER</MenuItem>
-            <MenuItem value={1} key={1}>BUYER</MenuItem>
+            <MenuItem value={0} key={0}>MINER</MenuItem>
+            <MenuItem value={1} key={1}>CERTIFYING AUTHORITY</MenuItem>
+            <MenuItem value={2} key={2}>COMMERICIAL USER</MenuItem>
           </TextField>
+          {type === 2 && (
+            <TextField
+              className={classes.inputHalfLeft}
+              label="Gender"
+              select
+              name="gender"
+              value={gender}
+              onChange={handleChange}
+            >
+              <MenuItem value={0} key={0}>Male</MenuItem>
+              <MenuItem value={1} key={1}>Female</MenuItem>
+            </TextField>
+          )}
           <TextField
             fullWidth
             className={classes.input}

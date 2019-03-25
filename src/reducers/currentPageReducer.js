@@ -3,7 +3,7 @@ import { REMOVE_CURRENT_USER } from '../zDrawer/UserProfile';
 import { GET_ALL_USERS } from '../zAdminPage/AdminPage';
 
 const INITIAL_STATE = {
-  currentPage: 'productPage',
+  currentPage: 'browse_all_gold',
   currentUser: {},
   allUsers: [],
   changePasswordOpen: false,

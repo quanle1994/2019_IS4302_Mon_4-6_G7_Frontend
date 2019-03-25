@@ -1,14 +1,17 @@
 import axios from 'axios';
-import BACKEND_SERVER from './constants';
-
-const BASE_URL = `${BACKEND_SERVER}/auth/Seller`;
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: '/user',
   responseType: 'json',
   timeout: 10000,
   contentType: 'application/json',
 });
+
+const getAllAssets = () => api
+  .get(
+    '/getAllAssets',
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
 
 const createProduct = product => api
   .post(
@@ -55,4 +58,5 @@ export default {
   getMyProducts,
   setShipped,
   deleteProduct,
+  getAllAssets,
 };

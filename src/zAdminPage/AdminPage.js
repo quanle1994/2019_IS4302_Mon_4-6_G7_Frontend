@@ -44,7 +44,7 @@ class AdminPage extends React.Component {
     this.getAllUser();
     this.setState({}, () => dispatch({
       type: SET_CURRENT_PAGE,
-      currentPage: 'adminPage',
+      currentPage: 'join_requests',
     }));
   }
 
@@ -237,9 +237,10 @@ const style = theme => ({
     height: '100%',
     width: '100%',
     textAlign: 'center',
-    backgroundColor: 'LightGray',
+    // backgroundColor: 'LightGray',
     padding: 20,
     boxSizing: 'border-box',
+    borderRadius: 5,
   },
   header: {
     color: '#E84A5F',
