@@ -8,7 +8,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import EnhancedTableHead from './EnhancedTableHead';
-import convert from "../DollarConverter";
+import convert from '../DollarConverter';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -46,10 +46,10 @@ const styles = theme => ({
 class EnhancedTable extends React.Component {
   state = {
     order: 'asc',
-    orderBy: 'calories',
+    orderBy: '',
     selected: [],
     page: 0,
-    rowsPerPage: 5,
+    rowsPerPage: 3,
   };
 
   handleRequestSort = (event, property) => {
@@ -112,7 +112,7 @@ class EnhancedTable extends React.Component {
                         );
                       }
                       return (
-                        <TableCell align="right">{val}</TableCell>
+                        <TableCell align="right" padding="none">{val}</TableCell>
                       );
                     })}
                   </TableRow>

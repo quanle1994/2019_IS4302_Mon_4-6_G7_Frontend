@@ -7,27 +7,22 @@ import sellerApi from '../../../api/seller';
 import convert from '../../../commons/DollarConverter';
 import GoldTable from './GoldTable';
 import DeedsTable from './DeedsTable';
-import DeedSplitRequestTable from './DeedSplitRequestTable';
+import { SET_ASSETS } from '../../../reducers/userAssetsReducer';
 
 class OwnershipPaper extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      golds: {},
-      money: {},
-      deeds: {},
-    };
-  }
-
   componentWillMount() {
+    const { dispatch } = this.props;
     sellerApi.getAllAssets().then((res) => {
-      this.setState({ ...res.data });
+      this.setState({ ...res.data }, () => dispatch({
+        type: SET_ASSETS,
+        assets: { ...res.data },
+      }));
     }).catch(e => console.log(e));
   }
 
   render() {
-    const { classes, dispatch } = this.props;
-    const { golds, deeds, money } = this.state;
+    const { classes, dispatch, userAssets } = this.props;
+    const { golds, deeds, money } = userAssets;
 
     return (
       <Paper className={classes.ownership}>
@@ -41,13 +36,10 @@ class OwnershipPaper extends React.Component {
           />
         </div>
         <div className={classes.section}>
-          <GoldTable golds={golds} />
+          <GoldTable golds={golds} deeds={deeds} />
         </div>
         <div className={classes.section}>
           <DeedsTable deeds={deeds} />
-        </div>
-        <div className={classes.section}>
-          <DeedSplitRequestTable deeds={deeds} />
         </div>
       </Paper>
     );
@@ -63,12 +55,14 @@ const style = () => ({
   },
   section: {
     width: '100%',
-    height: '43.5%',
+    height: '47%',
     paddingTop: 10,
   },
 });
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => ({
+  userAssets: state.userAssets,
+});
 
 const mapDispatchToProps = dispatch => ({ dispatch });
 

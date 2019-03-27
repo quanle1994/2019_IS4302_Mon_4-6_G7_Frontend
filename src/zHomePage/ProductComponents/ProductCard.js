@@ -72,7 +72,7 @@ class ProductCard extends React.Component {
         style={{ width: 'auto', margin: 'auto' }}
         alt="img"
         height={150}
-        src="https://lf.lids.com/hwl?set=sku[20957821],c[2],w[1000],h[750]&call=url[file:product]"
+        src="https://img.etimg.com/thumb/height-480,width-640,imgsize-148822,msid-68557855/gold-4-ts.jpg"
       />
     );
     const orgImg = src => (
@@ -92,8 +92,10 @@ class ProductCard extends React.Component {
               title={product.productName}
             >
               <div className={classes.productWrapper}>
-                {product.photoDir === null ? stdImg() : orgImg(product.photoDir)}
-                <div className={classes.priceTag}><Typography variant="h6" className={classes.price}>{`S$ ${product.price}`}</Typography></div>
+                {product.photoDir === null || product.photoDir === undefined ? stdImg() : orgImg(product.photoDir)}
+                <div className={classes.priceTag}>
+                  <Typography variant="h6" className={classes.price}>{`S$ ${product.unitPrice} / g`}</Typography>
+                </div>
               </div>
             </CardMedia>
             <CardContent className={classes.cardContent}>
@@ -123,9 +125,10 @@ class ProductCard extends React.Component {
 
 const style = () => ({
   container: {
-    width: 400,
+    width: 370,
     flex: 'none',
     margin: 10,
+    float: 'left',
   },
   media: {
     textAlign: 'center',

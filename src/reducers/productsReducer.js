@@ -1,5 +1,3 @@
-import { GET_ALL_PRODUCTS } from '../zHomePage/ProductComponents/ProductCarousel';
-
 const INITIAL_STATE = {
   products: [],
   filter: '',
@@ -15,6 +13,7 @@ const INITIAL_STATE = {
   productCreateOpen: false,
 };
 
+export const GET_ALL_PRODUCTS = 'GET_ALL_PRODUCTS';
 export const OPEN_PRODUCT_VIEWER = 'OPEN_PRODUCT_VIEWER';
 export const CLOSE_PRODUCT_VIEWER = 'CLOSE_PRODUCT_VIEWER';
 export const UPDATE_PRODUCT_FILTER = 'UPDATE_PRODUCT_FILTER';

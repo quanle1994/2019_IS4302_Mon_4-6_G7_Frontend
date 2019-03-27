@@ -163,10 +163,10 @@ class Searchbar extends React.Component {
       });
     };
     const items = Object.values(cartItems).map(obj => obj.quantity).reduce((a, b) => a + b, 0);
-    const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Verified Sellers', 'About Us'];
-    const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Verified Sellers', 'About Us'];
-    const minerTabs = ['Browse All Gold', 'Our Mines', 'Verified Sellers', 'About Us'];
-    const caTabs = ['Browse All Gold', 'Verification Requests', 'Our Mines', 'Verified Sellers', 'About Us'];
+    const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Verified Sellers'];
+    const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Verified Sellers'];
+    const minerTabs = ['Browse All Gold', 'Our Mines', 'Verified Sellers'];
+    const caTabs = ['Browse All Gold', 'Verification Requests', 'Our Mines', 'Verified Sellers'];
     const type = localStorage.getItem('type');
     const tabs = type === 'ADMIN' ? adminTabs : type === 'MINER' ? minerTabs : type === 'CA' ? caTabs : publicTabs;
     const tTabs = tabs.map(tab => tab.split(' ').join('_').toLowerCase());

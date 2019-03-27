@@ -3,7 +3,6 @@ import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
 import { Redirect, Route, Router } from 'react-router';
-import SideBar from './ProductComponents/SideBar';
 import history from '../history';
 import AdminPage from '../zAdminPage/AdminPage';
 import ProductCarousel from './ProductComponents/ProductCarousel';
@@ -15,13 +14,10 @@ import CartPage from '../zCartPage/CartPage';
 import PaymentDialog from '../zCartPage/PaymentDialog';
 import OrderPage from '../zOrderPage/OrderPage';
 import ProductViewer from './ProductComponents/ProductViewer';
-import SellerProductsPage from '../zSellerProductsPage/SellerProductsPage';
-import ProductEditDialog from '../zSellerProductsPage/ProductEditDialog';
-import ProductCreateDialog from '../zSellerProductsPage/ProductCreateDialog';
 import MineCatalogue from './MineComponents/MineCatalogue';
 import VerificationRequests from './VerificationRequests/VerificationRequests';
-import AboutUs from './AboutUsComponents/AboutUs';
 import VerifiedSellers from './VerifiedSellersComponents/VerifiedSellers';
+import DeedDialog from './ProductComponents/DeedDialogComponents/DeedDialog';
 
 class ProductsPage extends React.Component {
   constructor(props) {
@@ -54,10 +50,12 @@ class ProductsPage extends React.Component {
         <ChangePasswordDialog />
         <PaymentDialog />
         <ProductViewer />
-        <ProductEditDialog />
-        <ProductCreateDialog />
+        <DeedDialog />
         <Router history={history}>
-          <div style={{ height: '100%', width: '100%', overflowX: 'auto', overflowY: 'auto' }}>
+          <div style={{
+            height: '100%', width: '100%', overflowX: 'auto', overflowY: 'auto',
+          }}
+          >
             <Route
               exact
               path="/join_requests"
@@ -91,40 +89,18 @@ class ProductsPage extends React.Component {
             />
             <Route
               exact
-              path="/products"
-              render={() => (
-                localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} /> : <SellerProductsPage />
-              )}
-            />
-            <Route
-              exact
-              path="/products/create"
-              render={({ match }) => (
-                localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} />
-                  : <SellerProductsPage create match={match} />
-              )}
-            />
-            <Route
-              exact
-              path="/products/edit/:pId"
-              render={({ match }) => (
-                localStorage.getItem('type') !== 'SELLER' ? <Redirect to={{ pathname: '/' }} />
-                  : <SellerProductsPage edit match={match} />
-              )}
-            />
-            <Route
-              exact
               path="/orders"
               render={() => (
                 localStorage.getItem('token') === null ? <Redirect to={{ pathname: '/' }} /> : <OrderPage />
               )}
             />
             <Route exact path="/" component={ProductCarousel} />
+            <Route exact path="/create_deed/:gId" render={({ match }) => <ProductCarousel feedback match={match} />} />
+            <Route exact path="/split_deed/:dId" render={({ match }) => <ProductCarousel feedback match={match} />} />
             <Route exact path="/browse_all_gold" component={ProductCarousel} />
             <Route exact path="/our_mines" component={MineCatalogue} />
             <Route exact path="/verification_requests" component={VerificationRequests} />
             <Route exact path="/verified_sellers" component={VerifiedSellers} />
-            <Route exact path="/about_us" component={AboutUs} />
             <Route exact path="/shopping_cart" component={CartPage} />
             <Route path="/view/:pId" component={ProductCarousel} />
             <Route path="/feedback/:pId/:cId" render={({ match }) => <ProductCarousel feedback match={match} />} />

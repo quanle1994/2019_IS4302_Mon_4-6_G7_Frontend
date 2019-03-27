@@ -17,4 +17,5 @@
 
 #site-body {
   flex: auto;
+  overflow-y: hidden;
 }

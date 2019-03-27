@@ -6,11 +6,12 @@ import { Paper } from '@material-ui/core';
 import { SET_CURRENT_PAGE } from '../../reducers/currentPageReducer';
 import ProductCard from './ProductCard';
 import { OPEN_USER_REGISTRATION_FORM } from '../../zDrawer/SideDrawer';
-import { OPEN_PRODUCT_VIEWER } from '../../reducers/productsReducer';
+import { GET_ALL_PRODUCTS, OPEN_PRODUCT_VIEWER } from '../../reducers/productsReducer';
 import SideBar from './SideBar';
 import OwnershipPaper from './OwnershipComponents/OwnershipPaper';
+import { OPEN_CREATE_DEED_DIALOG } from '../../reducers/deedsReducer';
+import listingsApi from '../../api/listings';
 
-export const GET_ALL_PRODUCTS = 'GET_ALL_PRODUCTS';
 class ProductCarousel extends React.Component {
   componentWillMount() {
     const { dispatch, register, feedback } = this.props;
@@ -24,29 +25,26 @@ class ProductCarousel extends React.Component {
       currentPage: 'browse_all_gold',
       products: [],
     }));
-    // listingsApi.getAllListings().then((response) => {
-    //   const products = response.data;
-    //   const catMapping = {};
-    // products.forEach((a) => {
-    //   // const init = _catMapping[a.category];
-    //   catMapping[a.category] = catMapping[a.category] === undefined ? [] : catMapping[a.category];
-    //   catMapping[a.category].push(a);
-    // });
-    // this.setState({}, () => dispatch({
-    //   type: GET_ALL_PRODUCTS,
-    //   products,
-    //   catMapping,
-    //   cats: products.map(p => p.category),
-    // }));
-    // }).catch(error => ErrorDialog('getting all products', error));
+    listingsApi.getAllListings().then((response) => {
+      this.setState({}, () => dispatch({
+        type: GET_ALL_PRODUCTS,
+        products: response.data,
+      }));
+    });
     if (this.props.match === undefined) return;
-    const { pId, cId } = this.props.match.params;
+    const { pId, cId, gId } = this.props.match.params;
     if (pId !== undefined && cId !== undefined) {
       dispatch({
         type: OPEN_PRODUCT_VIEWER,
         pId: parseFloat(pId),
         cId: parseFloat(cId),
         isView: feedback === undefined,
+      });
+    }
+    if (gId !== undefined) {
+      dispatch({
+        type: OPEN_CREATE_DEED_DIALOG,
+        gId: parseFloat(gId),
       });
     }
   }
@@ -60,13 +58,13 @@ class ProductCarousel extends React.Component {
     const {
       classes, products, filter, currentUser,
     } = this.props;
-    const filteredProducts = products.filter(p => this.filterProduct(p, filter) && p.quantity > 0);
+    // const filteredProducts = products.filter(p => this.filterProduct(p, filter) && p.quantity > 0);
     const cats = {};
-    filteredProducts.map((p) => {
-      cats[p.category] = cats[p.category] === undefined ? [] : cats[p.category];
-      cats[p.category].push(p);
-      return true;
-    });
+    // filteredProducts.map((p) => {
+    //   cats[p.category] = cats[p.category] === undefined ? [] : cats[p.category];
+    //   cats[p.category].push(p);
+    //   return true;
+    // });
     const isUser = currentUser.username !== undefined && currentUser.type !== 'ADMIN';
     return (
       <div className={classes.container}>
@@ -74,13 +72,7 @@ class ProductCarousel extends React.Component {
           <SideBar />
         </div>
         <Paper className={isUser ? classes.products : classes.noOwnership}>
-          {/* {filteredCats.map(cat => ( */}
-          {/* <div className={classes.products}> */}
-          {/* {cats[cat].map(p => ( */}
-          {/* <ProductCard product={p} /> */}
-          {/* ))} */}
-          {/* </div> */}
-          {/* ))} */}
+          {products !== undefined && products.map(p => (<ProductCard product={p} />))}
         </Paper>
         {isUser && <OwnershipPaper />}
       </div>

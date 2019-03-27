@@ -14,13 +14,12 @@ import TableRow from '@material-ui/core/TableRow/TableRow';
 import TableCell from '@material-ui/core/TableCell/TableCell';
 import TextField from '@material-ui/core/TextField/TextField';
 import Button from '@material-ui/core/Button/Button';
-import { CLOSE_PRODUCT_VIEWER } from '../../reducers/productsReducer';
+import {CLOSE_PRODUCT_VIEWER, GET_ALL_PRODUCTS} from '../../reducers/productsReducer';
 import history from '../../history';
 import buyerApi from '../../api/buyer';
 import ErrorDialog from '../../commons/ErrorDialog';
 import SuccessDialog from '../../commons/SuccessDialog';
 import listingsApi from '../../api/listings';
-import { GET_ALL_PRODUCTS } from './ProductCarousel';
 
 class ProductViewer extends React.Component {
   constructor(props) {

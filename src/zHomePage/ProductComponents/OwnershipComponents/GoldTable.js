@@ -2,7 +2,9 @@ import React from 'react';
 import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
-import { Paper } from '@material-ui/core';
+import { Paper, Typography } from '@material-ui/core';
+import Button from '@material-ui/core/Button/Button';
+import history from '../../../history';
 import EnhancedTable from '../../../commons/DataTable/EnhancedTable';
 
 // const config = [
@@ -16,6 +18,19 @@ import EnhancedTable from '../../../commons/DataTable/EnhancedTable';
 class GoldTable extends React.Component {
   render() {
     const { classes, dispatch, golds } = this.props;
+    const data = golds === undefined || golds.balance === undefined ? [] : golds.balance;
+    const convertGoldToDeeds = (goldId) => {
+      history.push(`create_deed/${goldId}`);
+    };
+    data.forEach(row => row.convert = (
+      <Button
+        style={{ fontSize: 11 }}
+        variant="contained"
+        color="primary"
+        onClick={() => convertGoldToDeeds(row.id)}
+      >Create Deed
+      </Button>
+    ));
     const tableData = {
       header: 'Physical Gold',
       config: [
@@ -28,8 +43,11 @@ class GoldTable extends React.Component {
         {
           id: 'cost', numeric: false, disablePadding: true, label: 'Cost', isCurrency: true,
         },
+        {
+          id: 'convert', numeric: false, disablePadding: true, label: 'Convert To Deeds', isButton: true,
+        },
       ],
-      data: golds === undefined || golds.balance === undefined ? [] : golds.balance,
+      data,
     };
     return (
       <div className={classes.container}>
