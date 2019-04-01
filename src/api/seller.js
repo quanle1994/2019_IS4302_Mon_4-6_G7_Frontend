@@ -51,6 +51,46 @@ const deleteProduct = (sellerId, pId) => api
     { params: { sellerId, pId }, headers: { Authorisation: localStorage.getItem('token') } },
   );
 
+const createDeedCa = data => api
+  .post(
+    '/createDeedCa',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const listDeedForSale = data => api
+  .post(
+    '/listDeedForSale',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const getAllMiners = () => api
+  .get(
+    '/getAllMiners',
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const getAllCas = () => api
+  .get(
+    '/getAllCas',
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const convertGoldToDeed = data => api
+  .post(
+    '/convertGoldToDeed',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const topupGold = data => api
+  .post(
+    '/minerCreateGoldRequest',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
 export default {
   createProduct,
   getOrders,
@@ -59,4 +99,10 @@ export default {
   setShipped,
   deleteProduct,
   getAllAssets,
+  createDeedCa,
+  listDeedForSale,
+  getAllMiners,
+  getAllCas,
+  convertGoldToDeed,
+  topupGold,
 };

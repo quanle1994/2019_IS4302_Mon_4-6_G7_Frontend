@@ -7,8 +7,11 @@ const INITIAL_STATE = {
   currentUser: {},
   allUsers: [],
   changePasswordOpen: false,
+  moneyTopup: false,
 };
 
+export const OPEN_MONEY_TOPUP = 'OPEN_MONEY_TOPUP';
+export const CLOSE_MONEY_TOPUP = 'CLOSE_MONEY_TOPUP';
 export const SET_CURRENT_PAGE = 'SET_CURRENT_PAGE';
 export default function currentPageReducer(state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -16,6 +19,18 @@ export default function currentPageReducer(state = INITIAL_STATE, action) {
       return ({
         ...state,
         currentPage: action.currentPage,
+      });
+    }
+    case OPEN_MONEY_TOPUP: {
+      return ({
+        ...state,
+        moneyTopup: true,
+      });
+    }
+    case CLOSE_MONEY_TOPUP: {
+      return ({
+        ...state,
+        moneyTopup: false,
       });
     }
     case SET_CURRENT_USER: {

@@ -2,15 +2,15 @@ import React from 'react';
 import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
-import { Paper } from '@material-ui/core';
 import { SET_CURRENT_PAGE } from '../../reducers/currentPageReducer';
-import ProductCard from './ProductCard';
 import { OPEN_USER_REGISTRATION_FORM } from '../../zDrawer/SideDrawer';
-import { GET_ALL_PRODUCTS, OPEN_PRODUCT_VIEWER } from '../../reducers/productsReducer';
+import { OPEN_PRODUCT_VIEWER } from '../../reducers/productsReducer';
 import SideBar from './SideBar';
 import OwnershipPaper from './OwnershipComponents/OwnershipPaper';
-import { OPEN_CREATE_DEED_DIALOG } from '../../reducers/deedsReducer';
-import listingsApi from '../../api/listings';
+import {OPEN_CREATE_DEED_DIALOG, OPEN_LIST_DEED_DIALOG} from '../../reducers/deedsReducer';
+import ProductDisplay from '../ProductDisplayComponents/ProductDisplay';
+
+//register? feedback?
 
 class ProductCarousel extends React.Component {
   componentWillMount() {
@@ -25,55 +25,38 @@ class ProductCarousel extends React.Component {
       currentPage: 'browse_all_gold',
       products: [],
     }));
-    listingsApi.getAllListings().then((response) => {
-      this.setState({}, () => dispatch({
-        type: GET_ALL_PRODUCTS,
-        products: response.data,
-      }));
-    });
     if (this.props.match === undefined) return;
-    const { pId, cId, gId } = this.props.match.params;
-    if (pId !== undefined && cId !== undefined) {
+    const { pId, gId, dId } = this.props.match.params;
+    if (pId !== undefined) {
       dispatch({
         type: OPEN_PRODUCT_VIEWER,
-        pId: parseFloat(pId),
-        cId: parseFloat(cId),
+        pId,
         isView: feedback === undefined,
       });
     }
     if (gId !== undefined) {
       dispatch({
         type: OPEN_CREATE_DEED_DIALOG,
-        gId: parseFloat(gId),
+        gId,
+      });
+    }
+    if (dId !== undefined) {
+      dispatch({
+        type: OPEN_LIST_DEED_DIALOG,
+        dId,
       });
     }
   }
 
-  filterProduct = (p, filter) => {
-    const string = `id=${p.id}|${p.productName}|${p.category}|${p.productDescription}`;
-    return string.toLowerCase().indexOf(filter.toLowerCase()) >= 0;
-  };
-
   render() {
-    const {
-      classes, products, filter, currentUser,
-    } = this.props;
-    // const filteredProducts = products.filter(p => this.filterProduct(p, filter) && p.quantity > 0);
-    const cats = {};
-    // filteredProducts.map((p) => {
-    //   cats[p.category] = cats[p.category] === undefined ? [] : cats[p.category];
-    //   cats[p.category].push(p);
-    //   return true;
-    // });
+    const { classes, currentUser } = this.props;
     const isUser = currentUser.username !== undefined && currentUser.type !== 'ADMIN';
     return (
       <div className={classes.container}>
         <div className={classes.sidebar}>
           <SideBar />
         </div>
-        <Paper className={isUser ? classes.products : classes.noOwnership}>
-          {products !== undefined && products.map(p => (<ProductCard product={p} />))}
-        </Paper>
+        <ProductDisplay />
         {isUser && <OwnershipPaper />}
       </div>
     );
@@ -108,10 +91,6 @@ const style = () => ({
 });
 
 const mapStateToProps = state => ({
-  products: state.products.products,
-  filter: state.products.filter,
-  catMapping: state.products.catMapping,
-  cats: state.products.cats,
   currentUser: state.currentPage.currentUser,
 });
 

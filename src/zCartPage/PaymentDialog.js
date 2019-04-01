@@ -34,7 +34,7 @@ class PaymentDialog extends React.Component {
 
   componentWillMount() {
     const { cartItems, currentUser } = this.props;
-    const orderTotal = Object.values(cartItems).map(obj => obj.product.price * obj.quantity).reduce((a, b) => a + b, 0);
+    const orderTotal = Object.values(cartItems).map(obj => obj.offerPrice).reduce((a, b) => a + b, 0);
     this.setState({
       address: currentUser.address,
       orderTotal: parseFloat(orderTotal).toFixed(2),
@@ -43,7 +43,7 @@ class PaymentDialog extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const { token, currentUser, cartItems } = nextProps;
-    const orderTotal = Object.values(cartItems).map(obj => obj.product.price * obj.quantity).reduce((a, b) => a + b, 0);
+    const orderTotal = Object.values(cartItems).map(obj => obj.offerPrice).reduce((a, b) => a + b, 0);
     this.setState({
       fullname: localStorage.getItem('fullname'),
       address: currentUser.address,

@@ -14,6 +14,9 @@ import ErrorDialog from '../commons/ErrorDialog';
 import UserProfile from './UserProfile';
 import SuccessDialog from '../commons/SuccessDialog';
 import history from '../history';
+import buyerApi from '../api/buyer';
+import { MODIFY_CART } from '../reducers/cartReducer';
+import { SET_OFFERS } from '../reducers/offerReducer';
 
 export const CLOSE_LEFT_DRAWER = 'CLOSE_LEFT_DRAWER';
 export const OPEN_USER_REGISTRATION_FORM = 'OPEN_USER_REGISTRATION_FORM';
@@ -42,20 +45,36 @@ class SideDrawer extends React.Component {
         const currentUser = response.data;
         localStorage.setItem('auth', response.headers['x-auth']);
         localStorage.setItem('user', JSON.stringify(currentUser));
-        // localStorage.setItem('id', currentUser.id);
-        // localStorage.setItem('fullname', currentUser.fullname);
-        // localStorage.setItem('token', `${_username}|||${_password}`);
         localStorage.setItem('photoDir', currentUser.photoDir);
         localStorage.setItem('username', currentUser.username);
+        localStorage.setItem('name', currentUser.name);
         localStorage.setItem('type', currentUser.type);
-        // localStorage.setItem('emailAddress', currentUser.emailAddress);
-        // localStorage.setItem('gender', currentUser.gender);
-        // localStorage.setItem('dob', currentUser.dob);
-        // localStorage.setItem('cart', currentUser.cartString);
         dispatch({
           type: SET_CURRENT_USER,
           currentUser,
         });
+        const offers = {};
+        buyerApi.getMyOffers().then((res) => {
+          res.data.forEach((o) => {
+            offers[o.transactionId] = o;
+          });
+          this.setState({}, () => {
+            dispatch({
+              type: MODIFY_CART,
+              cartItems: { ...offers },
+            });
+          });
+        }).catch(e => console.log(e));
+        const myOffers = {};
+        buyerApi.getMyOffers(localStorage.getItem('username')).then((res) => {
+          res.data.forEach((o) => {
+            myOffers[o.transactionId] = o;
+          });
+          dispatch({
+            type: SET_OFFERS,
+            offers: { ...myOffers },
+          });
+        }).catch(e => console.log(e));
         setTimeout(closeDrawer, 500);
         SuccessDialog('Logged In', `User ${email}`, 'logged in',
           currentUser.type === 'ADMIN' ? '/join_requests' : currentUser.type === 'MINER'

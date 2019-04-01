@@ -8,7 +8,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import EnhancedTableHead from './EnhancedTableHead';
-import convert from '../DollarConverter';
+import convert from '../NumberConverter';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -34,7 +34,7 @@ function getSorting(order, orderBy) {
   return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
 }
 
-const styles = theme => ({
+const styles = () => ({
   root: {
     width: '100%',
   },
@@ -79,7 +79,6 @@ class EnhancedTable extends React.Component {
     const {
       order, orderBy, rowsPerPage, page,
     } = this.state;
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
     return (
       <Paper className={classes.root}>
@@ -97,6 +96,7 @@ class EnhancedTable extends React.Component {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map(n => (
                   <TableRow
+                    key={Math.random()}
                     hover
                     tabIndex={-1}
                     key={n.id}
@@ -108,11 +108,11 @@ class EnhancedTable extends React.Component {
                       const val = field.isCurrency ? convert(n[field.id]) : n[field.id];
                       if (i === 0) {
                         return (
-                          <TableCell component="th" scope="row" padding="none">{val}</TableCell>
+                          <TableCell key={Math.random()} component="th" scope="row" padding="none">{val}</TableCell>
                         );
                       }
                       return (
-                        <TableCell align="right" padding="none">{val}</TableCell>
+                        <TableCell key={Math.random()} align="right" padding="none">{val}</TableCell>
                       );
                     })}
                   </TableRow>

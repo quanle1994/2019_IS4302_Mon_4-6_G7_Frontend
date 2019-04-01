@@ -18,9 +18,11 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import history from '../history';
 import CartViewer from './CartViewer';
-import { OPEN_CART_VIEWER } from '../reducers/cartReducer';
+import { MODIFY_CART, OPEN_CART_VIEWER } from '../reducers/cartReducer';
 import { UPDATE_PRODUCT_FILTER } from '../reducers/productsReducer';
 import { SET_CURRENT_PAGE } from '../reducers/currentPageReducer';
+import buyerApi from '../api/buyer';
+import { SET_OFFERS } from '../reducers/offerReducer';
 
 const styles = theme => ({
   root: {
@@ -114,6 +116,9 @@ const styles = theme => ({
     marginTop: 8,
     height: 33,
   },
+  padding: {
+    padding: `0 ${theme.spacing.unit * 2}px`,
+  },
 });
 
 export const OPEN_LEFT_DRAWER = 'OPEN_LEFT_DRAWER';
@@ -125,6 +130,29 @@ class Searchbar extends React.Component {
     };
   }
 
+  componentWillMount() {
+    const { dispatch } = this.props;
+    const offers = {};
+    buyerApi.getMyOffers().then((res) => {
+      res.data.forEach((o) => {
+        offers[o.transactionId] = o;
+      });
+      dispatch({
+        type: MODIFY_CART,
+        cartItems: { ...offers },
+      });
+    }).catch(e => console.log(e));
+    const myOffers = {};
+    buyerApi.getMyOffers(localStorage.getItem('username')).then((res) => {
+      res.data.forEach((o) => {
+        myOffers[o.transactionId] = o;
+      });
+      dispatch({
+        type: SET_OFFERS,
+        offers: { ...myOffers },
+      });
+    }).catch(e => console.log(e));
+  }
 
   handleOpenCartViewer = (e) => {
     const { dispatch, cartViewerOpen } = this.props;
@@ -146,7 +174,7 @@ class Searchbar extends React.Component {
   render() {
     const { value } = this.state;
     const {
-      classes, dispatch, currentUser, cartItems, currentPage,
+      classes, dispatch, currentUser, cartItems, currentPage, offers,
     } = this.props;
     const handleProfileMenuOpen = () => {
       this.setState({}, () => dispatch({
@@ -162,13 +190,14 @@ class Searchbar extends React.Component {
         history.push(page);
       });
     };
-    const items = Object.values(cartItems).map(obj => obj.quantity).reduce((a, b) => a + b, 0);
-    const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Verified Sellers'];
-    const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Verified Sellers'];
-    const minerTabs = ['Browse All Gold', 'Our Mines', 'Verified Sellers'];
-    const caTabs = ['Browse All Gold', 'Verification Requests', 'Our Mines', 'Verified Sellers'];
+    const items = Object.values(cartItems).filter(o => o.status === 'PENDING').length;
+    const offersCount = Object.values(offers).length;
+    const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Certificate Authorities'];
+    const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Certificate Authorities'];
+    const minerTabs = ['Browse All Gold', 'Our Mines', 'Certificate Authorities'];
+    const caTabs = ['Browse All Gold', 'Offers', 'Our Mines', 'Certificate Authorities'];
     const type = localStorage.getItem('type');
-    const tabs = type === 'ADMIN' ? adminTabs : type === 'MINER' ? minerTabs : type === 'CA' ? caTabs : publicTabs;
+    const tabs = type === 'ADMIN' ? adminTabs : type === 'Miner' ? minerTabs : type === 'CertificateAuthority' ? caTabs : publicTabs;
     const tTabs = tabs.map(tab => tab.split(' ').join('_').toLowerCase());
     const pos = tTabs.indexOf(currentPage);
     if (value !== pos) this.setState({ value: pos });
@@ -177,13 +206,14 @@ class Searchbar extends React.Component {
       const url = tabs[val].split(' ').join('_').toLowerCase();
       handlePageOpen(url);
     };
-    const username = localStorage.getItem('username');
+    const name = localStorage.getItem('name');
+    const display = (tab, count) => (tab !== 'Offers' ? true : count === 0);
     return (
       <div className={classes.root}>
         <AppBar position="static">
           <Toolbar className={classes.toolbar}>
             <Typography className={classes.title} variant="h5" color="inherit" noWrap>
-              {username === null ? 'WELCOME TO GOLD CHAIN' : `Hi ${username}! Welcome back to GOLD CHAIN!`}
+              {name === null ? 'WELCOME TO GOLD CHAIN' : `Hi ${name}! Welcome back to GOLD CHAIN!`}
             </Typography>
             <div className={classes.grow} />
             <div className={classes.search}>
@@ -212,7 +242,7 @@ class Searchbar extends React.Component {
                   />
                 </div>
               )}
-              {currentUser.type === 'COMMERCIAL' && (
+              {currentUser.type === 'RegisteredUser' && (
                 <div>
                   <CartViewer />
                   <IconButton color="inherit">
@@ -221,16 +251,6 @@ class Searchbar extends React.Component {
                     </Badge>
                   </IconButton>
                 </div>
-              )}
-              {false && (
-                <IconButton
-                  aria-owns="material-appbar"
-                  aria-haspopup="true"
-                  color="inherit"
-                  onClick={() => handlePageOpen('shopping_cart')}
-                >
-                  <ShoppingCart />
-                </IconButton>
               )}
               <IconButton
                 aria-owns="material-appbar"
@@ -245,7 +265,19 @@ class Searchbar extends React.Component {
           <div className={classes.toolbarTabs}>
             <Tabs value={value} onChange={handleChange}>
               {tabs.map(tab => (
-                <Tab label={tab} />
+                <Tab
+                  key={Math.random()}
+                  label={(
+                    <Badge
+                      badgeContent={offersCount}
+                      className={classes.padding}
+                      invisible={display(tab, offersCount)}
+                      color="secondary"
+                    >
+                      {tab}
+                    </Badge>
+                  )}
+                />
               ))}
             </Tabs>
           </div>
@@ -258,6 +290,7 @@ class Searchbar extends React.Component {
 const mapStateToProps = state => ({
   currentUser: state.currentPage.currentUser,
   cartItems: state.cart.cartItems,
+  offers: state.offers.offers,
   cartViewerOpen: state.cart.cartViewerOpen,
   currentPage: state.currentPage.currentPage,
 });

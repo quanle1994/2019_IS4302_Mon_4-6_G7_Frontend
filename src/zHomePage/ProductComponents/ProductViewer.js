@@ -3,8 +3,6 @@ import React from 'react';
 import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
-import Paper from '@material-ui/core/Paper/Paper';
-import DialogTitle from '@material-ui/core/DialogTitle/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent/DialogContent';
 import Dialog from '@material-ui/core/Dialog/Dialog';
 import Typography from '@material-ui/core/Typography/Typography';
@@ -14,34 +12,29 @@ import TableRow from '@material-ui/core/TableRow/TableRow';
 import TableCell from '@material-ui/core/TableCell/TableCell';
 import TextField from '@material-ui/core/TextField/TextField';
 import Button from '@material-ui/core/Button/Button';
-import {CLOSE_PRODUCT_VIEWER, GET_ALL_PRODUCTS} from '../../reducers/productsReducer';
+import { DialogActions } from '@material-ui/core';
+import { CLOSE_PRODUCT_VIEWER } from '../../reducers/productsReducer';
 import history from '../../history';
+import convert from '../../commons/NumberConverter';
 import buyerApi from '../../api/buyer';
 import ErrorDialog from '../../commons/ErrorDialog';
 import SuccessDialog from '../../commons/SuccessDialog';
-import listingsApi from '../../api/listings';
+import { MODIFY_CART } from '../../reducers/cartReducer';
 
 class ProductViewer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      canFeedback: false,
-      myComment: '',
-      rating: 5,
+      price: 0,
     };
   }
 
   componentWillReceiveProps(nextProps) {
-    const { pId, isView } = nextProps;
-    if (pId > 0 && !isView) {
-      buyerApi.checkCanFeedback(localStorage.getItem('id'), pId).then(
-        () => this.setState({ canFeedback: true }),
-      ).catch(
-        () => this.setState({ canFeedback: false }),
-      );
-    } else {
-      this.setState({ canFeedback: false });
-    }
+    const { products, pId } = nextProps;
+    if (pId <= 0) return;
+    const product = products.filter(p => p.deedId === pId)[0];
+    if (product === undefined) return;
+    this.setState({ price: product.price * product.goldWeight });
   }
 
   handleClose = () => {
@@ -52,59 +45,55 @@ class ProductViewer extends React.Component {
     });
   };
 
-  handleSubmitFeedback = () => {
-    const { cId, dispatch } = this.props;
-    const { myComment, rating } = this.state;
-    const f = {
-      buyerId: parseFloat(localStorage.getItem('id')),
-      cId: parseFloat(cId),
-      feedback: myComment,
-      rating: parseFloat(rating),
-    };
-    buyerApi.sendFeedback(f).then(() => {
-      SuccessDialog('Submit Feedback Successfully', 'Feedback', 'submitted');
-      this.updateProducts(dispatch);
-    }).catch(error => ErrorDialog('sending feedback', error));
-  };
+  handleOffer = () => {
+    const { price } = this.state;
+    const { dispatch, pId } = this.props;
+    buyerApi.offer({
+      offerPrice: price,
+      deedId: pId,
+      buyerId: localStorage.getItem('username'),
+    }).then(() => {
+      const offers = {};
+      buyerApi.getMyOffers().then((res) => {
+        res.data.forEach((o) => {
+          offers[o.transactionId] = o;
+        });
+        dispatch({
+          type: MODIFY_CART,
+          cartItems: { ...offers },
+        });
+      }).catch(e => console.log(e));
 
-  updateProducts = dispatch => listingsApi.getAllListings().then((response) => {
-    const products = response.data;
-    const catMapping = {};
-    products.forEach((a) => {
-      catMapping[a.category] = [];
-      catMapping[a.category].push(a);
-    });
-    this.setState({}, () => dispatch({
-      type: GET_ALL_PRODUCTS,
-      products,
-      catMapping,
-      cats: products.map(p => p.category),
-    }));
-  }).catch(error => ErrorDialog('getting all products', error));
+      SuccessDialog('Make Offer Successful', 'Offer', 'lodged', '/', () => dispatch({
+        type: CLOSE_PRODUCT_VIEWER,
+      }));
+    }).catch(e => ErrorDialog('making an offer', e));
+  };
 
   render() {
     const {
-      classes, products, productViewerOpen, pId,
+      classes, products, productViewerOpen, pId, dispatch,
     } = this.props;
-    const { canFeedback, myComment, rating } = this.state;
+    const { price } = this.state;
     if (pId <= 0) return null;
-    const product = products.filter(p => p.id === pId)[0];
+    const product = products.filter(p => p.deedId === pId)[0];
     const table = product === undefined ? [] : [
-      ['Product ID', product.id],
-      ['Category', product.category],
-      ['Description', product.productDescription],
-      ['Price', product.price],
-      ['Remaining Stock', product.quantity],
-      ['Seller', product.sellerName],
-      ['Ratings', product.rating],
+      ['Deed ID', product.deedId],
+      ['Type of Sale', product.listingState === 'FOR_SALE' ? '1 TO 1 SALE' : 'AUCTION'],
+      ['Description', product.description],
+      ['Price', `${convert(product.price)} / g`],
+      ['Weight', `${product.goldWeight} g`],
+      ['Total', convert(product.price * product.goldWeight)],
+      ['Seller', product.currentOwner.name],
+      ['Gold Purity', product.purity],
     ];
-    const comments = product === undefined ? [] : product.comments;
+    // const comments = product === undefined ? [] : product.comments;
     const stdImg = () => (
       <img
         style={{ width: 'auto', margin: 'auto' }}
         alt="img"
         height={150}
-        src="https://lf.lids.com/hwl?set=sku[20957821],c[2],w[1000],h[750]&call=url[file:product]"
+        src="https://img.etimg.com/thumb/height-480,width-640,imgsize-148822,msid-68557855/gold-4-ts.jpg"
       />
     );
     const orgImg = src => (
@@ -118,6 +107,9 @@ class ProductViewer extends React.Component {
     const handleOnchange = e => this.setState({
       [e.target.name]: e.target.value,
     });
+    const type = localStorage.getItem('type');
+    const userId = localStorage.getItem('username');
+    const dots = product === undefined || product.photoDirs === undefined || product.photoDirs === null ? [''] : product.photoDirs;
     return product !== undefined && (
       <Dialog
         open={productViewerOpen}
@@ -125,82 +117,57 @@ class ProductViewer extends React.Component {
         fullWidth
         maxWidth="lg"
       >
-        <Paper>
-          <DialogTitle>{product.productName}</DialogTitle>
-          <DialogContent>
-            <div className={classes.container}>
-              <div className={classes.photo}>
-                {product.photoDir === null ? stdImg() : orgImg(product.photoDir)}
+        <DialogContent>
+          <div className={classes.container}>
+            <div className={classes.photo}>
+              {product.photoDirs === null || product.photoDirs === undefined || product.photoDirs[0] === undefined
+                ? stdImg() : orgImg(product.photoDir)}
+              <Typography
+                component="p"
+                style={{
+                  color: '#E84A5F',
+                  marginBottom: 20,
+                  fontSize: 20,
+                }}
+              >{product.title}
+              </Typography>
+              <div className={classes.dotsWrapper}>
+                {dots.map(() => (<div className={classes.dot} />))}
               </div>
-              <div className={classes.details}>
-                <Typography
-                  variant="h4"
-                  style={{
-                    color: '#E84A5F',
-                    marginBottom: 20,
-                  }}
-                >Product Details
-                </Typography>
-                <Table>
-                  <TableBody>
-                    {table.map(row => (
-                      <TableRow>
-                        {row.map(field => (
-                          <TableCell>{field}</TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                <div className={classes.bottomWrapper}>
-                  {canFeedback && (
-                    <div className={classes.feedback}>
-                      <TextField
-                        error
-                        variant="outlined"
-                        type="number"
-                        label="Ratings:"
-                        name="rating"
-                        value={rating}
-                        onChange={handleOnchange}
-                        style={{
-                          marginTop: 20,
-                        }}
-                      />
-                      <TextField
-                        error
-                        variant="outlined"
-                        multiline
-                        rowsMax={3}
-                        label={`User - ${localStorage.getItem('fullname')}`}
-                        fullWidth
-                        placeholder="Enter your feedback"
-                        name="myComment"
-                        value={myComment}
-                        onChange={handleOnchange}
-                        style={{
-                          marginTop: 20,
-                        }}
-                      />
-                      <Button
-                        variant="contained"
-                        style={{
-                          backgroundColor: 'teal',
-                          marginTop: 20,
-                        }}
-                        onClick={this.handleSubmitFeedback}
-                      >
-                        <Typography
-                          style={{
-                            color: 'white',
-                          }}
-                        >
-                          Submit
-                        </Typography>
-                      </Button>
-                    </div>
-                  )}
-                  <div className={classes.comments}>
+            </div>
+            <div className={classes.details}>
+              <Typography
+                variant="h4"
+                style={{
+                  color: '#E84A5F',
+                  marginBottom: 20,
+                }}
+              >Deed Details
+              </Typography>
+              <Table>
+                <TableBody>
+                  {table.map(row => (
+                    <TableRow>
+                      {row.map(field => (
+                        <TableCell>{field}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <div className={classes.bottomWrapper}>
+                <div className={classes.comments}>
+                  <Typography
+                    variant="h4"
+                    style={{
+                      color: 'teal',
+                      marginTop: 20,
+                      marginBottom: 20,
+                    }}
+                  >History
+                  </Typography>
+                  {userId === product.currentOwner.userId && (
+                  <div>
                     <Typography
                       variant="h4"
                       style={{
@@ -208,33 +175,46 @@ class ProductViewer extends React.Component {
                         marginTop: 20,
                         marginBottom: 20,
                       }}
-                    >Feedback
+                    >Available Offers
                     </Typography>
-                    <Table>
-                      <TableBody>
-                        {comments.map(comment => (
-                          <TableRow>
-                            <TableCell>
-                              <TextField
-                                variant="outlined"
-                                multiline
-                                rowsMax={3}
-                                label={`${comment.buyerName} - Ratings: ${comment.rating}`}
-                                fullWidth
-                                value={comment.comment}
-                                InputProps={{ readOnly: true }}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
                   </div>
+                  )}
                 </div>
               </div>
             </div>
-          </DialogContent>
-        </Paper>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          {type === 'RegisteredUser' && product.currentOwner.userId !== localStorage.getItem('username') && (
+          <TextField
+            variant="outlined"
+            label="Offer Price"
+            value={price}
+            name="price"
+            onChange={handleOnchange}
+          />
+          )}
+          {type === 'RegisteredUser' && product.currentOwner.userId !== localStorage.getItem('username') && (
+          <Button
+            variant="contained"
+            color="primary"
+            className={classes.offerButton}
+            onClick={this.handleOffer}
+          >Offer to Buy
+          </Button>
+          )}
+          <Button
+            variant="outlined"
+            className={classes.closeButton}
+            onClick={() => {
+              history.push('/');
+              dispatch({
+                type: CLOSE_PRODUCT_VIEWER,
+              });
+            }}
+          >Close
+          </Button>
+        </DialogActions>
       </Dialog>
     );
   }
@@ -250,6 +230,7 @@ const style = () => ({
   photo: {
     width: 500,
     height: '100%',
+    textAlign: 'center',
   },
   details: {
     flex: 'auto',
@@ -259,8 +240,18 @@ const style = () => ({
     overflowX: 'hidden',
     overflowY: 'auto',
   },
-  feedback: {
-    textAlign: 'right',
+  offerButton: {
+    width: 150,
+    marginLeft: 20,
+  },
+  closeButton: {
+    width: 100,
+  },
+  dotsWrapper: {
+    float: 'left',
+  },
+  dot: {
+    cursor: 'pointer',
   },
 });
 
@@ -268,7 +259,6 @@ const mapStateToProps = state => ({
   products: state.products.products,
   productViewerOpen: state.products.productViewerOpen,
   pId: state.products.pId,
-  cId: state.products.cId,
   isView: state.products.isView,
 });
 

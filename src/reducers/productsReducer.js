@@ -1,11 +1,10 @@
 const INITIAL_STATE = {
   products: [],
   filter: '',
-  catMapping: {},
-  cats: [],
+  sort: -1,
+  minmax: [],
   productViewerOpen: false,
   pId: 0,
-  cId: 0,
   editPID: 0,
   isView: true,
   sellerProducts: [],
@@ -22,6 +21,8 @@ export const OPEN_PRODUCT_EDIT = 'OPEN_PRODUCT_EDIT';
 export const CLOSE_PRODUCT_EDIT = 'CLOSE_PRODUCT_EDIT';
 export const OPEN_PRODUCT_CREATE = 'OPEN_PRODUCT_CREATE';
 export const CLOSE_PRODUCT_CREATE = 'CLOSE_PRODUCT_CREATE';
+export const UPDATE_PRODUCT_SORT = 'UPDATE_PRODUCT_SORT';
+export const UPDATE_PRODUCT_RANGE = 'UPDATE_PRODUCT_RANGE';
 
 export default function productsReducer(state = INITIAL_STATE, action) {
   switch (action.type) {
@@ -29,8 +30,22 @@ export default function productsReducer(state = INITIAL_STATE, action) {
       return ({
         ...state,
         products: action.products,
-        catMapping: action.catMapping,
-        cats: action.cats,
+      });
+    }
+    case UPDATE_PRODUCT_SORT: {
+      return ({
+        ...state,
+        sort: action.sort,
+      });
+    }
+    case UPDATE_PRODUCT_RANGE: {
+      const { minmax } = action;
+      const { minmax: range } = state;
+      if (minmax[0] !== undefined && minmax[0] !== null) range[0] = parseFloat(minmax[0]);
+      if (minmax[1] !== undefined && minmax[1] !== null) range[1] = parseFloat(minmax[1]);
+      return ({
+        ...state,
+        minmax: [...range],
       });
     }
     case OPEN_PRODUCT_VIEWER: {
@@ -38,7 +53,6 @@ export default function productsReducer(state = INITIAL_STATE, action) {
         ...state,
         productViewerOpen: true,
         pId: action.pId,
-        cId: action.cId,
         isView: action.isView,
       });
     }

@@ -4,28 +4,34 @@ import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
 import Typography from '@material-ui/core/Typography/Typography';
-import Paper from '@material-ui/core/Paper/Paper';
 import classNames from 'classnames';
-import TextField from '@material-ui/core/TextField/TextField';
-import MenuItem from '@material-ui/core/MenuItem/MenuItem';
-import InputBase from '@material-ui/core/InputBase/InputBase';
-import Table from '@material-ui/core/Table/Table';
-import TableHead from '@material-ui/core/TableHead/TableHead';
-import TableRow from '@material-ui/core/TableRow/TableRow';
-import TableCell from '@material-ui/core/TableCell/TableCell';
-import Tooltip from '@material-ui/core/Tooltip/Tooltip';
-import TableSortLabel from '@material-ui/core/TableSortLabel/TableSortLabel';
-import TableBody from '@material-ui/core/TableBody/TableBody';
-import TableFooter from '@material-ui/core/TableFooter/TableFooter';
-import TablePagination from '@material-ui/core/TablePagination/TablePagination';
 import TablePaginationActions from '@material-ui/core/TablePagination/TablePaginationActions';
 import { fade } from '@material-ui/core/styles/colorManipulator';
-import { SET_CURRENT_PAGE } from '../reducers/currentPageReducer';
-import convert, { convertDateTime } from '../commons/NumberConverter';
-import { OPEN_PAYMENT_DIALOG } from '../reducers/cartReducer';
-import {Button} from "@material-ui/core";
+import TablePagination from '@material-ui/core/TablePagination';
+import TableRow from '@material-ui/core/TableRow';
+import TableFooter from '@material-ui/core/TableFooter';
+import TableCell from '@material-ui/core/TableCell';
+import TableBody from '@material-ui/core/TableBody';
+import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputBase from '@material-ui/core/InputBase';
+import Table from '@material-ui/core/Table';
+import TableHead from '@material-ui/core/TableHead';
+import Tooltip from '@material-ui/core/Tooltip';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import { Button } from '@material-ui/core';
+import convert, { convertDateTime } from '../../commons/NumberConverter';
+import { SET_CURRENT_PAGE } from '../../reducers/currentPageReducer';
+import listingsApi from '../../api/listings';
+import SuccessDialog from '../../commons/SuccessDialog';
+import ErrorDialog from '../../commons/ErrorDialog';
+import buyerApi from '../../api/buyer';
+import { MODIFY_CART } from '../../reducers/cartReducer';
+import { SET_OFFERS } from '../../reducers/offerReducer';
 
-class CartPage extends React.Component {
+
+class Offers extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -40,41 +46,34 @@ class CartPage extends React.Component {
   }
 
   componentWillMount() {
-    const { dispatch, cartItems, payment } = this.props;
+    const { dispatch, offers } = this.props;
     dispatch({
       type: SET_CURRENT_PAGE,
-      currentPage: 'shopping_cart',
+      currentPage: 'offers',
     });
-    const items = this.transform(cartItems);
+    const items = this.transform(offers);
     this.setState({ items });
-    if (payment !== undefined) {
-      dispatch({
-        type: OPEN_PAYMENT_DIALOG,
-      });
-    }
   }
 
   componentWillReceiveProps(nextProps) {
-    // const { cartItems } = nextProps;
     const { filterValue } = this.state;
-    // const items = this.transform(cartItems);
     const dummy = { target: { value: filterValue } };
     this.handleFilter(dummy, nextProps);
-    // this.setState({ items });
   }
 
-  transform = cartItems => Object.values(cartItems).map(obj => ({
+  transform = offers => Object.values(offers).map(obj => ({
     time: convertDateTime(obj.timestamp),
     id: obj.deedToBuy.deedId,
     title: obj.deedOffer.title,
-    owner: obj.deedOffer.owner,
-    price: obj.deedOffer.offerPrice,
+    buyer: obj.buyer.name, // Get buyer's details
+    price: convert(obj.deedOffer.offerPrice),
     goldId: obj.deedToBuy.gold.goldId,
     goldWeight: obj.deedOffer.goldWeight,
     goldPurity: obj.deedOffer.purity,
     miner: obj.deedToBuy.gold.minerInfo.name,
     ca: obj.deedToBuy.gold.ca,
     status: obj.deedOffer.status,
+    tx: obj.transactionId,
   }));
 
   sortItems = () => {
@@ -89,6 +88,7 @@ class CartPage extends React.Component {
         else if (order[header] && result === 0) result = -1 * check;
         return true;
       });
+      // console.log(`Comparing ${u1[header]} with ${u2[header]}, result = ${result}` );
       return result;
     });
 
@@ -121,8 +121,8 @@ class CartPage extends React.Component {
     const { filterField } = this.state;
     const filterValue = e.target.value;
     this.setState({ filterValue });
-    const cartItemsRaw = props !== undefined ? props.cartItems : cartItems;
-    const items = this.transform(cartItemsRaw);
+    const offersRaw = props !== undefined ? props.offers : cartItems;
+    const items = this.transform(offersRaw);
     const filteredItems = items.filter((u) => {
       let orgString = '';
       if (filterField === 'allfields') {
@@ -137,6 +137,34 @@ class CartPage extends React.Component {
     });
   };
 
+  handleAcceptOffer = (item) => {
+    const { dispatch } = this.props;
+    listingsApi.acceptOffer({
+      deedId: item.id,
+      tx: item.tx,
+    }).then(() => SuccessDialog('Accepted Offer', 'Offer', 'accepted', null, () => {
+      const offers = {};
+      buyerApi.getMyOffers().then((res) => {
+        res.data.forEach((o) => {
+          offers[o.transactionId] = o;
+        });
+        dispatch({
+          type: MODIFY_CART,
+          cartItems: { ...offers },
+        });
+      }).catch(e => console.log(e));
+      buyerApi.getMyOffers(localStorage.getItem('username')).then((res) => {
+        res.data.forEach((o) => {
+          offers[o.transactionId] = o;
+        });
+        dispatch({
+          type: SET_OFFERS,
+          offers: { ...offers },
+        });
+      }).catch(e => console.log(e));
+    })).catch(e => ErrorDialog('accepting offer', e));
+  };
+
   render() {
     const { classes } = this.props;
     const {
@@ -145,23 +173,21 @@ class CartPage extends React.Component {
     const handleChangeFilterField = e => this.setState({
       filterField: e.target.value,
     });
-    const headers = ['Time', 'Deed ID', 'Product Name', 'Owner', 'Price', 'Gold ID', 'Gold Weight', 'Gold Purity', 'Miner', 'CA', 'Status'];
-    const ids = ['time', 'id', 'title', 'owner', 'price', 'goldId', 'goldWeight', 'goldPurity', 'miner', 'ca'];
+    const headers = ['Time', 'Deed ID', 'Buyer', 'Price', 'Gold ID', 'Gold Weight', 'Gold Purity', 'Miner', 'CA', 'Action'];
+    const ids = ['time', 'id', 'buyer', 'price', 'goldId', 'goldWeight', 'goldPurity', 'miner', 'ca'];
     const handleChangePage = (event, p) => { this.setState({ page: p }); };
     const handleChangeRowsPerPage = (event) => {
       this.setState({
         rowsPerPage: event.target.value,
       });
     };
-    const number = items.filter(i => i.status !== 'ACCEPTED').reduce((a, b) => parseFloat(a) + parseFloat(b.price), 0);
-    const accepted = items.filter(i => i.status === 'ACCEPTED').reduce((a, b) => parseFloat(a) + parseFloat(b.price), 0);
     return (
       <div className={classes.container}>
         <div style={{
           position: 'relative',
         }}
         >
-          <Typography variant="h4" className={classes.header}>My Cart</Typography>
+          <Typography variant="h4" className={classes.header}>{items[0].title}</Typography>
         </div>
         <Paper className={classes.wrapper}>
           <div className={classes.filterWrapper}>
@@ -217,12 +243,15 @@ class CartPage extends React.Component {
                     <TableCell padding="dense">{item[id]}</TableCell>
                   ))}
                   <TableCell padding="dense">
-                    <Button
-                      variant={item.status === 'PENDING' ? 'outlilned' : 'contained'}
-                      color={item.status === 'PENDING' ? '' : item.status === 'ACCEPTED' ? 'primary' : 'secondary'}
-                    >
-                      {item.status}
-                    </Button>
+                    {item.status === 'PENDING' && (
+                      <Button
+                        // variant="outlined"
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => this.handleAcceptOffer(item)}
+                      >Accept
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -239,16 +268,6 @@ class CartPage extends React.Component {
                   onChangeRowsPerPage={handleChangeRowsPerPage}
                   ActionsComponent={TablePaginationActions}
                 />
-                <TableCell
-                  colSpan={3}
-                >
-                  <div style={{overflow: 'hidden'}}>
-                    <Typography variant="h6" className={classes.totalText}>Pending:&nbsp;{convert(number)}</Typography>
-                  </div>
-                  <div style={{overflow: 'hidden'}}>
-                    <Typography variant="h6" className={classes.acceptedText}>Paid:&nbsp;{convert(accepted)}</Typography>
-                  </div>
-                </TableCell>
               </TableRow>
             </TableFooter>
           </Table>
@@ -260,7 +279,6 @@ class CartPage extends React.Component {
 
 const style = theme => ({
   container: {
-    height: '100%',
     width: '100%',
     textAlign: 'center',
     marginBottom: 100,
@@ -286,7 +304,7 @@ const style = theme => ({
     marginBottom: 20,
   },
   wrapper: {
-    backgroundColor: '#FECEAB',
+    // backgroundColor: '#FECEAB',
   },
   tableBody: {
     backgroundColor: 'rgba(255,255,255,0.6)',
@@ -336,25 +354,12 @@ const style = theme => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  totalText: {
-    float: 'right',
-    color: '#E84A5F',
-  },
-  acceptedText: {
-    float: 'right',
-    color: '#009688',
-  },
-  total: {
-    float: 'right',
-    marginRight: 20,
-    color: '#E84A5F',
-  },
 });
 
 const mapStateToProps = state => ({
-  cartItems: state.cart.cartItems,
+
 });
 
 const mapDispatchToProps = dispatch => ({ dispatch });
 
-export default compose(withStyles(style), connect(mapStateToProps, mapDispatchToProps))(CartPage);
+export default compose(withStyles(style), connect(mapStateToProps, mapDispatchToProps))(Offers);

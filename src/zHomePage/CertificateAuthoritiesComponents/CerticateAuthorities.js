@@ -2,33 +2,36 @@ import React from 'react';
 import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
-import Typography from '@material-ui/core/Typography/Typography';
 import { SET_CURRENT_PAGE } from '../../reducers/currentPageReducer';
 import sellerApi from '../../api/seller';
-import { SET_MINERS } from '../../reducers/usersReducer';
-import MinerCard from './MinerCard';
+import { SET_CAS } from '../../reducers/usersReducer';
+import CaCard from './CaCard';
 
-class MineCatalogue extends React.Component {
+class CerticateAuthorities extends React.Component {
   componentWillMount() {
     const { dispatch } = this.props;
     this.setState({}, () => dispatch({
       type: SET_CURRENT_PAGE,
-      currentPage: 'our_mines',
+      currentPage: 'certificate_authorities',
       products: [],
     }));
-    sellerApi.getAllMiners().then(res => dispatch({
-      type: SET_MINERS,
-      miners: res.data,
+    sellerApi.getAllCas().then(res => dispatch({
+      type: SET_CAS,
+      cas: res.data,
     })).catch(e => console.log(e));
   }
 
   render() {
-    const { classes, miners } = this.props;
+    const {
+      classes, cas,
+    } = this.props;
     return (
       <div className={classes.container}>
-        {miners !== undefined && miners.map(miner => (
-          <MinerCard miner={miner} />
-        ))}
+        <div>
+          {cas.map(ca => (
+            <CaCard ca={ca} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -38,7 +41,8 @@ const style = () => ({
   container: {
     height: '100%',
     width: '100%',
-    float: 'left',
+    display: 'flex',
+    flexDirection: 'column',
   },
   catWrapper: {
     marginTop: 20,
@@ -52,9 +56,9 @@ const style = () => ({
 });
 
 const mapStateToProps = state => ({
-  miners: state.users.miners,
+  cas: state.users.cas,
 });
 
 const mapDispatchToProps = dispatch => ({ dispatch });
 
-export default compose(withStyles(style), connect(mapStateToProps, mapDispatchToProps))(MineCatalogue);
+export default compose(withStyles(style), connect(mapStateToProps, mapDispatchToProps))(CerticateAuthorities);

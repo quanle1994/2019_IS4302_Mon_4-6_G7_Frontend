@@ -1,10 +1,7 @@
 import axios from 'axios';
-import BACKEND_SERVER from './constants';
-
-const BASE_URL = `${BACKEND_SERVER}/auth/Buyer`;
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: '/user',
   responseType: 'json',
   timeout: 10000,
   contentType: 'application/json',
@@ -47,6 +44,27 @@ const logout = (buyerId, cartString) => api
     'logout',
     { params: { buyerId, cartString }, headers: { Authorisation: localStorage.getItem('token') } },
   );
+
+const offer = data => api
+  .post(
+    '/offerRequest',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const getMyOffers = userId => api
+  .get(
+    `/getMyOffers${userId === undefined ? '' : `/${userId}`}`,
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const topupRequest = data => api
+  .post(
+    'increaseCash',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
 export default {
   createOrder,
   getOrders,
@@ -54,4 +72,7 @@ export default {
   checkCanFeedback,
   setDelivered,
   logout,
+  offer,
+  getMyOffers,
+  topupRequest,
 };

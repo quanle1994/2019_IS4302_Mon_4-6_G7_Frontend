@@ -18,16 +18,16 @@ import EnhancedTable from '../../../commons/DataTable/EnhancedTable';
 class GoldTable extends React.Component {
   render() {
     const { classes, dispatch, golds } = this.props;
-    const data = golds === undefined || golds.balance === undefined ? [] : golds.balance;
+    const data = golds === undefined ? [] : golds;
     const convertGoldToDeeds = (goldId) => {
       history.push(`create_deed/${goldId}`);
     };
-    data.forEach(row => row.convert = (
+    data.forEach(row => row.convert = row.goldWeight === 0 || localStorage.getItem('type') !== 'CertificateAuthority' ? null : (
       <Button
         style={{ fontSize: 11 }}
         variant="contained"
         color="primary"
-        onClick={() => convertGoldToDeeds(row.id)}
+        onClick={() => convertGoldToDeeds(row.goldId)}
       >Create Deed
       </Button>
     ));
@@ -35,13 +35,16 @@ class GoldTable extends React.Component {
       header: 'Physical Gold',
       config: [
         {
-          id: 'weight', numeric: false, disablePadding: true, label: 'Weight (g)',
+          id: 'goldWeight', numeric: false, disablePadding: true, label: 'Weight (g)',
         },
         {
-          id: 'purity', numeric: false, disablePadding: true, label: 'Purity %',
+          id: 'weightListed', numeric: false, disablePadding: true, label: 'Listed (g)',
         },
         {
-          id: 'cost', numeric: false, disablePadding: true, label: 'Cost', isCurrency: true,
+          id: 'goldPurity', numeric: false, disablePadding: true, label: 'Purity %',
+        },
+        {
+          id: 'ca', numeric: false, disablePadding: true, label: 'Verified By',
         },
         {
           id: 'convert', numeric: false, disablePadding: true, label: 'Convert To Deeds', isButton: true,

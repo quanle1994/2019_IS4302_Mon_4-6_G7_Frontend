@@ -15,9 +15,11 @@ import PaymentDialog from '../zCartPage/PaymentDialog';
 import OrderPage from '../zOrderPage/OrderPage';
 import ProductViewer from './ProductComponents/ProductViewer';
 import MineCatalogue from './MineComponents/MineCatalogue';
-import VerificationRequests from './VerificationRequests/VerificationRequests';
-import VerifiedSellers from './VerifiedSellersComponents/VerifiedSellers';
-import DeedDialog from './ProductComponents/DeedDialogComponents/DeedDialog';
+import VerifiedSellers from './CertificateAuthoritiesComponents/CerticateAuthorities';
+import CreateDeedDialog from './ProductComponents/DeedDialogComponents/CreateDeedDialog';
+import ListDeedDialog from './ProductComponents/DeedDialogComponents/ListDeedDialog';
+import OffersSummary from './OfferComponents/OffersSummary';
+import MoneyTopupDialog from "./ProductComponents/OwnershipComponents/MoneyTopupDialog";
 
 class ProductsPage extends React.Component {
   constructor(props) {
@@ -50,7 +52,9 @@ class ProductsPage extends React.Component {
         <ChangePasswordDialog />
         <PaymentDialog />
         <ProductViewer />
-        <DeedDialog />
+        <CreateDeedDialog />
+        <ListDeedDialog />
+        <MoneyTopupDialog />
         <Router history={history}>
           <div style={{
             height: '100%', width: '100%', overflowX: 'auto', overflowY: 'auto',
@@ -96,11 +100,11 @@ class ProductsPage extends React.Component {
             />
             <Route exact path="/" component={ProductCarousel} />
             <Route exact path="/create_deed/:gId" render={({ match }) => <ProductCarousel feedback match={match} />} />
-            <Route exact path="/split_deed/:dId" render={({ match }) => <ProductCarousel feedback match={match} />} />
+            <Route exact path="/list_deed/:dId" render={({ match }) => <ProductCarousel feedback match={match} />} />
             <Route exact path="/browse_all_gold" component={ProductCarousel} />
             <Route exact path="/our_mines" component={MineCatalogue} />
-            <Route exact path="/verification_requests" component={VerificationRequests} />
-            <Route exact path="/verified_sellers" component={VerifiedSellers} />
+            <Route exact path="/offers" component={OffersSummary} />
+            <Route exact path="/certificate_authorities" component={VerifiedSellers} />
             <Route exact path="/shopping_cart" component={CartPage} />
             <Route path="/view/:pId" component={ProductCarousel} />
             <Route path="/feedback/:pId/:cId" render={({ match }) => <ProductCarousel feedback match={match} />} />

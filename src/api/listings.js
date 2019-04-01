@@ -12,14 +12,22 @@ const getAllListings = () => api
     '/getAllListings',
   );
 
-const updateCart = (userId, cartItems) => api
+const acceptOffer = data => api
   .post(
-    '/updateCart',
-    { userId, cartItems },
-    { headers: { Authorisation: localStorage.getItem('token') } },
+    '/acceptOffer',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const delist = data => api
+  .post(
+    '/delist',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
 export default {
   getAllListings,
-  updateCart,
+  acceptOffer,
+  delist,
 };

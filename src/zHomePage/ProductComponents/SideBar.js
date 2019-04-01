@@ -10,24 +10,47 @@ import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import Checkbox from '@material-ui/core/Checkbox';
+import { UPDATE_PRODUCT_RANGE, UPDATE_PRODUCT_SORT } from '../../reducers/productsReducer';
 
 class SideBar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       select: -1,
-      range: [],
+      min: null,
+      max: null,
     };
   }
 
+  handleChangeRange = (e, ind) => {
+    const { dispatch } = this.props;
+    const ra = [];
+    const name = ind === 0 ? 'min' : 'max';
+    this.setState({ [name]: e.target.value });
+    ra[ind] = e.target.value;
+    dispatch({
+      type: UPDATE_PRODUCT_RANGE,
+      minmax: [...ra],
+    });
+  };
 
   render() {
-    const { select, range } = this.state;
+    const { select, min, max } = this.state;
     const {
-      classes,
+      classes, dispatch,
     } = this.props;
-    const sortKeys = ['Popular', 'Price High - Low', 'Price Low - High'];
+    // const sortKeys = ['Popular', 'Price High - Low', 'Price Low - High'];
+    const sortKeys = ['Price High - Low', 'Price Low - High'];
     const sortLims = ['Minimum', 'Maximum'];
+    const handleChangeCheckbox = (ind) => {
+      const s = select === ind ? -1 : ind;
+      this.setState({ select: s }, () => {
+        dispatch({
+          type: UPDATE_PRODUCT_SORT,
+          sort: s,
+        });
+      });
+    };
     return (
       <div className={classes.container}>
         <Paper>
@@ -40,12 +63,12 @@ class SideBar extends React.Component {
             </TableHead>
             <TableBody>
               {sortKeys.map((sortKey, ind) => (
-                <TableRow>
+                <TableRow key={Math.random()}>
                   <TableCell>
                     {sortKey}
                   </TableCell>
                   <TableCell>
-                    <Checkbox checked={ind === select} onChange={() => { this.setState({ select: select === ind ? -1 : ind }); }} />
+                    <Checkbox checked={ind === select} onChange={() => handleChangeCheckbox(ind)} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -60,13 +83,15 @@ class SideBar extends React.Component {
               </TableRow>
             </TableHead>
             {sortLims.map((sortLim, ind) => (
-              <TableRow>
+              <TableRow key={`price-${ind}`}>
                 <TableCell className={classes.row}>
                   <TextField
+                    disableAutoFocus
                     type="number"
                     label={sortLim}
-                    value={range[ind]}
+                    value={ind === 0 ? min : max}
                     variant="outlined"
+                    onChange={e => this.handleChangeRange(e, ind)}
                   />
                 </TableCell>
               </TableRow>

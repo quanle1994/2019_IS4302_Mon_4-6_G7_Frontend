@@ -30,7 +30,7 @@ class AdminPage extends React.Component {
     super(props);
     this.state = {
       page: 0,
-      rowsPerPage: 5,
+      rowsPerPage: 10,
       users: [],
       selectedHeaders: [],
       order: {},
@@ -41,7 +41,7 @@ class AdminPage extends React.Component {
 
   componentWillMount() {
     const { dispatch } = this.props;
-    this.getAllUser();
+    this.getAllUsers();
     this.setState({}, () => dispatch({
       type: SET_CURRENT_PAGE,
       currentPage: 'join_requests',
@@ -54,7 +54,7 @@ class AdminPage extends React.Component {
     this.handleFilter(dummy, nextProps);
   }
 
-  getAllUser() {
+  getAllUsers() {
     const { dispatch } = this.props;
     adminApi.getAllUsers().then(response => this.setState({
       users: response.data,
@@ -130,8 +130,8 @@ class AdminPage extends React.Component {
     const {
       page, rowsPerPage, users, order, filterField,
     } = this.state;
-    const headers = ['ID', 'User Name', 'Full Name', 'Email', 'Type', 'Gender', 'DOB', 'Status', 'Action'];
-    const ids = ['id', 'username', 'fullname', 'emailAddress', 'type', 'gender', 'dob', 'status'];
+    const headers = ['ID', 'Full Name', 'Email', 'Type', 'Status', 'Action'];
+    const ids = ['userId', 'name', 'email', '$class', 'status'];
     const handleChangePage = (event, page) => { this.setState({ page }); };
     const handleChangeRowsPerPage = (event) => {
       this.setState({
@@ -139,7 +139,7 @@ class AdminPage extends React.Component {
       });
     };
     const handleToggle = id => adminApi.toggleActivity(id)
-      .then(() => this.getAllUser()).catch(error => ErrorDialog('changing user\'s activity', error));
+      .then(() => this.getAllUsers()).catch(error => ErrorDialog('changing user\'s activity', error));
     const formatDate = (rawValue) => {
       const value = new Date(rawValue);
       return value.toDateString();
@@ -201,11 +201,14 @@ class AdminPage extends React.Component {
               {users.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map(user => (
                 <TableRow>
                   {ids.map(id => (
-                    <TableCell padding="dense">{id === 'dob' ? formatDate(user[id]) : user[id]}</TableCell>
+                    <TableCell padding="dense">
+                      {id === '$class' ? user[id].split('goldchain.')[1] : user[id]}
+                    </TableCell>
                   ))}
                   <TableCell padding="dense">
-                    <Button variant="outlined" className={classes.activateButton} onClick={() => handleToggle(user.id)}>
-                      {user.statusOrdinal === 0 ? 'Deactivate' : 'Activate'}
+                    <Button
+                      variant="outlined"
+                    >ACTIVATE
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -241,12 +244,15 @@ const style = theme => ({
     padding: 20,
     boxSizing: 'border-box',
     borderRadius: 5,
+    marginBottom: 100,
   },
   header: {
     color: '#E84A5F',
     marginBottom: 20,
   },
   wrapper: {
+    width: '70%',
+    margin: 'auto',
     backgroundColor: '#FECEAB',
   },
   tableBody: {

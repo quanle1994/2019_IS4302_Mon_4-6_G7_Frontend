@@ -1,6 +1,6 @@
+import { REMOVE_CURRENT_USER } from '../zDrawer/UserProfile';
+
 const INITIAL_STATE = {
-  golds: {},
-  deeds: {},
   money: {},
 };
 
@@ -10,9 +10,14 @@ export default function userAssetsReducer(state = INITIAL_STATE, action) {
     case SET_ASSETS: {
       return ({
         ...state,
-        golds: action.assets.golds,
-        deeds: action.assets.deeds,
+        goldOwned: action.assets.goldOwned,
+        deedOwned: action.assets.deedOwned,
         money: action.assets.money,
+      });
+    }
+    case REMOVE_CURRENT_USER: {
+      return ({
+        ...INITIAL_STATE,
       });
     }
     default: return state;

@@ -1,5 +1,6 @@
 import { CLOSE_PAYMENT_DIALOG } from '../zCartPage/PaymentDialog';
 import { UPDATE_PAYMENT_TOKEN_FOR_SALES_ORDER_CREATION } from '../zPaymentComponent/PaymentForm';
+import { REMOVE_CURRENT_USER } from '../zDrawer/UserProfile';
 
 const INITIAL_STATE = {
   cartItems: {},
@@ -22,6 +23,12 @@ export default function cartReducer(state = INITIAL_STATE, action) {
         cartItems: {
           ...action.cartItems,
         },
+      });
+    }
+    case REMOVE_CURRENT_USER: {
+      return ({
+        ...state,
+        cartItems: {},
       });
     }
     case OPEN_CART_VIEWER: {

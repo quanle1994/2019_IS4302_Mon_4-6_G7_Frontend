@@ -14,6 +14,7 @@ import ListItemText from '@material-ui/core/ListItemText/ListItemText';
 import { CLOSE_CART_VIEWER } from '../reducers/cartReducer';
 import history from '../history';
 import { SET_CURRENT_PAGE } from '../reducers/currentPageReducer';
+import convert from "../commons/NumberConverter";
 
 class CartViewer extends React.Component {
   handleOnClose = () => {
@@ -37,7 +38,7 @@ class CartViewer extends React.Component {
     const {
       classes, cartItems, cartViewerOpen, anchorEl,
     } = this.props;
-    const number = Object.values(cartItems).map(obj => obj.product.price * obj.quantity).reduce((a, b) => a + b, 0);
+    const number = Object.values(cartItems).map(obj => obj.offerPrice).reduce((a, b) => a + b, 0);
     return (
       <Popover
         open={cartViewerOpen}
@@ -57,9 +58,8 @@ class CartViewer extends React.Component {
               <List component="nav">
                 {Object.values(cartItems).map(obj => (
                   <ListItem button>
-                    <ListItemText primary={obj.product.productName} className={classes.productName} />
-                    <ListItemText primary={obj.quantity} className={classes.quantity} />
-                    <ListItemText primary={parseFloat(obj.quantity * obj.product.price).toFixed(2)} className={classes.price} />
+                    <ListItemText primary={`Deed: ${obj.deedToBuy.title}`} className={classes.productName} />
+                    <ListItemText primary={convert(obj.offerPrice)} className={classes.price} />
                   </ListItem>
                 ))}
               </List>
@@ -68,7 +68,7 @@ class CartViewer extends React.Component {
               <Button variant="outlined" className={classes.button} onClick={this.handleOpenCartPage}>View Cart Page</Button>
               <div className={classes.floatRight}>
                 <Typography variant="h6" className={classes.total}>
-                  {parseFloat(number).toFixed(2)}
+                  {convert(number)}
                 </Typography>
                 <Typography variant="h6" className={classes.totalText}>Total:&nbsp;</Typography>
               </div>

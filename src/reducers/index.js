@@ -6,6 +6,8 @@ import cartReducer from './cartReducer';
 import ordersReducer from './ordersReducer';
 import deedsReducer from './deedsReducer';
 import userAssetsReducer from './userAssetsReducer';
+import usersReducer from './usersReducer';
+import offerReducer from './offerReducer';
 
 const rootReducer = combineReducers({
   sideDrawer: sideDrawerReducer,
@@ -15,6 +17,8 @@ const rootReducer = combineReducers({
   orders: ordersReducer,
   deeds: deedsReducer,
   userAssets: userAssetsReducer,
+  users: usersReducer,
+  offers: offerReducer,
 });
 
 export default rootReducer;

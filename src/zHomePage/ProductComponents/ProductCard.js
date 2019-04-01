@@ -17,44 +17,11 @@ import { OPEN_LEFT_DRAWER } from '../../zSearchbar/Searchbar';
 import ErrorDialog from '../../commons/ErrorDialog';
 import history from '../../history';
 import { OPEN_PRODUCT_VIEWER } from '../../reducers/productsReducer';
+import convert from '../../commons/NumberConverter';
+
+export const truncate = (string, n) => ( string === undefined ? '' : (string.length > n) ? `${string.substr(0, n - 1)}...` : string);
 
 class ProductCard extends React.Component {
-  handleAddItem = () => {
-    const { dispatch, cartItems, product } = this.props;
-
-    if (localStorage.getItem('token') === null) {
-      dispatch({
-        type: OPEN_LEFT_DRAWER,
-      });
-      return;
-    }
-
-    const item = cartItems[product.id];
-    const newCartItems = { ...cartItems };
-    if (item === undefined) {
-      newCartItems[product.id] = {
-        product,
-        quantity: 1,
-        addTime: new Date().getTime(),
-      };
-    } else {
-      if (item.quantity + 1 > product.quantity) {
-        ErrorDialog('adding a Product to Cart', 'Added Quantity Exceeds Remaining Stock');
-        return;
-      }
-      newCartItems[product.id] = {
-        product: item.product,
-        quantity: item.quantity + 1,
-        addTime: new Date().getTime(),
-      };
-    }
-    localStorage.setItem('cart', JSON.stringify(newCartItems));
-    dispatch({
-      type: MODIFY_CART,
-      cartItems: newCartItems,
-    });
-  };
-
   handleClickProduct = (pId) => {
     const { dispatch } = this.props;
     history.push(`/view/${pId}`);
@@ -83,10 +50,11 @@ class ProductCard extends React.Component {
         src={src}
       />
     );
-    return (
+    const user = localStorage.getItem('username');
+    return product.gold !== undefined && (
       <div className={classes.container}>
         <Card>
-          <CardActionArea onClick={() => this.handleClickProduct(product.id)}>
+          <CardActionArea onClick={() => this.handleClickProduct(product.deedId)}>
             <CardMedia
               className={classes.media}
               title={product.productName}
@@ -94,26 +62,42 @@ class ProductCard extends React.Component {
               <div className={classes.productWrapper}>
                 {product.photoDir === null || product.photoDir === undefined ? stdImg() : orgImg(product.photoDir)}
                 <div className={classes.priceTag}>
-                  <Typography variant="h6" className={classes.price}>{`S$ ${product.unitPrice} / g`}</Typography>
+                  <Typography variant="h6" className={classes.price}>{`${convert(product.price)} / g`}</Typography>
+                </div>
+                <div className={classes.weightTag}>
+                  <Typography component="p" className={classes.weight}>{`${product.goldWeight} g`}</Typography>
+                </div>
+                <div className={classes.caTag}>
+                  <Typography component="p" className={classes.ca}>{truncate(`CA: ${product.gold.ca}`, 16)}</Typography>
+                </div>
+                <div className={classes.ownerTag}>
+                  {user === product.currentOwner.userId && (
+                    <Typography component="p" className={classes.yours}>Yours</Typography>
+                  )}
+                  {user !== product.currentOwner.userId && (
+                    <Typography component="p" className={classes.ca}>{truncate(`Owner: ${product.currentOwner.name}`, 17)}</Typography>
+                  )}
                 </div>
               </div>
             </CardMedia>
             <CardContent className={classes.cardContent}>
-              <Typography variant="h6">{product.id}. {product.productName}</Typography>
+              <Typography variant="h6">{product.title}</Typography>
               <TextField
                 fullWidth
-                InputProps={{ readOnly: true }}
-                value={product.productDescription}
+                InputProps={{
+                  readOnly: true,
+                  style: {
+                    fontStyle: 'italic',
+                    fontSize: 15,
+                    color: '#546E7A',
+                  },
+                }}
+                value={truncate(product.description, 37)}
               />
             </CardContent>
           </CardActionArea>
           <CardActions className={classes.actions}>
-            {currentUser.type === 'BUYER' && (
-              <Button variant="fab" color="secondary" aria-label="Add" className={classes.fabButton} onClick={this.handleAddItem}>
-                <AddIcon />
-              </Button>
-            )}
-            <Button variant="outlined" className={classes.button} onClick={() => this.handleClickProduct(product.id)}>
+            <Button variant="outlined" className={classes.button} onClick={() => this.handleClickProduct(product.deedId)}>
               View product
             </Button>
           </CardActions>
@@ -125,7 +109,7 @@ class ProductCard extends React.Component {
 
 const style = () => ({
   container: {
-    width: 370,
+    width: 365,
     flex: 'none',
     margin: 10,
     float: 'left',
@@ -162,6 +146,42 @@ const style = () => ({
   },
   price: {
     color: 'white',
+  },
+  weightTag: {
+    position: 'absolute',
+    top: 50,
+    right: 0,
+    paddingRight: 5,
+  },
+  weight: {
+    color: '#E84A5F',
+    fontStyle: 'italic',
+  },
+  caTag: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    padding: 10,
+    paddingLeft: 15,
+    paddingRight: 15,
+    borderRadius: 5,
+  },
+  ownerTag: {
+    position: 'absolute',
+    top: 20,
+    left: 0,
+    padding: 10,
+    paddingLeft: 15,
+    paddingRight: 15,
+    borderRadius: 5,
+  },
+  ca: {
+    color: '#546E7A',
+    fontStyle: 'italic',
+  },
+  yours: {
+    color: '#E84A5F',
+    fontStyle: 'italic',
   },
   productWrapper: {
     position: 'relative',
