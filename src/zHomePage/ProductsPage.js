@@ -19,7 +19,7 @@ import VerifiedSellers from './CertificateAuthoritiesComponents/CerticateAuthori
 import CreateDeedDialog from './ProductComponents/DeedDialogComponents/CreateDeedDialog';
 import ListDeedDialog from './ProductComponents/DeedDialogComponents/ListDeedDialog';
 import OffersSummary from './OfferComponents/OffersSummary';
-import MoneyTopupDialog from "./ProductComponents/OwnershipComponents/MoneyTopupDialog";
+import MoneyTopupDialog from './ProductComponents/OwnershipComponents/MoneyTopupDialog';
 
 class ProductsPage extends React.Component {
   constructor(props) {

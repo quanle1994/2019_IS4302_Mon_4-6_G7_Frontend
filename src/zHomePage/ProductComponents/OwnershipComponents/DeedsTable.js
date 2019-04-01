@@ -7,9 +7,8 @@ import EnhancedTable from '../../../commons/DataTable/EnhancedTable';
 import history from '../../../history';
 import listingsApi from '../../../api/listings';
 import SuccessDialog from '../../../commons/SuccessDialog';
-import sellerApi from '../../../api/seller';
-import { SET_ASSETS } from '../../../reducers/userAssetsReducer';
-import { GET_ALL_PRODUCTS } from '../../../reducers/productsReducer';
+import ErrorDialog from '../../../commons/ErrorDialog';
+import {getAllAssets, getAllListings} from '../../../commons/RoutineUpdate';
 
 class DeedsTable extends React.Component {
   render() {
@@ -21,19 +20,9 @@ class DeedsTable extends React.Component {
         listingsApi.delist({
           deedId: row.deedId,
         }).then(() => SuccessDialog('Delisting Successfully', 'Deed', 'taken down', null, () => {
-          sellerApi.getAllAssets().then((res) => {
-            this.setState({ ...res.data }, () => dispatch({
-              type: SET_ASSETS,
-              assets: { ...res.data },
-            }));
-          }).catch(e => console.log(e));
-          listingsApi.getAllListings().then((response) => {
-            this.setState({}, () => dispatch({
-              type: GET_ALL_PRODUCTS,
-              products: response.data,
-            }));
-          });
-        }));
+          getAllAssets(dispatch);
+          getAllListings(dispatch);
+        })).catch(e => ErrorDialog('taking down deed', e));
       }
     };
     data.forEach((row) => {

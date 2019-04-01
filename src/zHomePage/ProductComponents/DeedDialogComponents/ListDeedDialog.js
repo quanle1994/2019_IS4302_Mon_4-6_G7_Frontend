@@ -13,6 +13,8 @@ import { CLOSE_LIST_DEED_DIALOG } from '../../../reducers/deedsReducer';
 import history from '../../../history';
 import sellerApi from '../../../api/seller';
 import ErrorDialog from '../../../commons/ErrorDialog';
+import SuccessDialog from '../../../commons/SuccessDialog';
+import {getAllListings} from "../../../commons/RoutineUpdate";
 
 class CreateDeedDialog extends React.Component {
   constructor(props) {
@@ -83,10 +85,11 @@ class CreateDeedDialog extends React.Component {
         description: d,
         weightToList,
       }).then(() => {
-        dispatch({
-          type: CLOSE_LIST_DEED_DIALOG,
-        });
-        history.push('/');
+        getAllListings(dispatch);
+        SuccessDialog('Deed is Successfully Listed', 'Deed', 'listed', '/',
+          () => dispatch({
+            type: CLOSE_LIST_DEED_DIALOG,
+          }));
       }).catch(e => new ErrorDialog('creating deed', e));
     };
     return deedOwned !== undefined && deed !== undefined && gold !== undefined && (
@@ -133,6 +136,7 @@ class CreateDeedDialog extends React.Component {
                 fullWidth
               />
               <TextField
+                variant="filled"
                 className={classes.specialField}
                 type="String"
                 label="Gold Weight / g"
@@ -140,6 +144,7 @@ class CreateDeedDialog extends React.Component {
                 InputProps={{ readOnly: true }}
               />
               <TextField
+                variant="filled"
                 className={classes.specialField}
                 type="String"
                 label="Gold Purity"
@@ -149,10 +154,11 @@ class CreateDeedDialog extends React.Component {
               <TextField
                 className={classes.textField}
                 type="String"
-                variant="outlined"
+                variant={localStorage.getItem('type') === 'RegisteredUser' ? 'filled' : 'outlined'}
                 label="Amount To List"
                 value={amount}
                 name="amount"
+                InputProps={{ readOnly: localStorage.getItem('type') === 'RegisteredUser' }}
                 fullWidth
                 onChange={e => handleChangeAmt(e, deed.goldWeight)}
               />

@@ -1,4 +1,6 @@
-const convert = number => `$ ${isNaN(number) ? '-' : parseFloat(number).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+const convert = number => `$ ${Number.isNaN(number) ? '-' : parseFloat(number).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+
+export const format = number => `${Number.isNaN(number) ? '-' : parseFloat(number).toFixed(0).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
 
 export const convertDateTime = (dateValue, isDateOnly) => {
   const date = new Date(dateValue);

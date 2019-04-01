@@ -23,6 +23,7 @@ import { UPDATE_PRODUCT_FILTER } from '../reducers/productsReducer';
 import { SET_CURRENT_PAGE } from '../reducers/currentPageReducer';
 import buyerApi from '../api/buyer';
 import { SET_OFFERS } from '../reducers/offerReducer';
+import {getOffers} from "../commons/RoutineUpdate";
 
 const styles = theme => ({
   root: {
@@ -132,26 +133,7 @@ class Searchbar extends React.Component {
 
   componentWillMount() {
     const { dispatch } = this.props;
-    const offers = {};
-    buyerApi.getMyOffers().then((res) => {
-      res.data.forEach((o) => {
-        offers[o.transactionId] = o;
-      });
-      dispatch({
-        type: MODIFY_CART,
-        cartItems: { ...offers },
-      });
-    }).catch(e => console.log(e));
-    const myOffers = {};
-    buyerApi.getMyOffers(localStorage.getItem('username')).then((res) => {
-      res.data.forEach((o) => {
-        myOffers[o.transactionId] = o;
-      });
-      dispatch({
-        type: SET_OFFERS,
-        offers: { ...myOffers },
-      });
-    }).catch(e => console.log(e));
+    getOffers(dispatch);
   }
 
   handleOpenCartViewer = (e) => {
@@ -190,9 +172,9 @@ class Searchbar extends React.Component {
         history.push(page);
       });
     };
-    const items = Object.values(cartItems).filter(o => o.status === 'PENDING').length;
-    const offersCount = Object.values(offers).length;
-    const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Our Mines', 'Certificate Authorities'];
+    const items = Object.values(cartItems).filter(o => o.deedOffer.status === 'PENDING').length;
+    const offersCount = Object.values(offers).filter(o => o.deedOffer.status === 'PENDING').length;
+    const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Offers', 'Our Mines', 'Certificate Authorities'];
     const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Certificate Authorities'];
     const minerTabs = ['Browse All Gold', 'Our Mines', 'Certificate Authorities'];
     const caTabs = ['Browse All Gold', 'Offers', 'Our Mines', 'Certificate Authorities'];

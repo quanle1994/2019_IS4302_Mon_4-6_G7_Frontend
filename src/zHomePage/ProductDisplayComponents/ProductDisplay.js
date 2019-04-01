@@ -3,19 +3,14 @@ import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
 import { Paper } from '@material-ui/core';
-import listingsApi from '../../api/listings';
-import { GET_ALL_PRODUCTS } from '../../reducers/productsReducer';
 import ProductCard from '../ProductComponents/ProductCard';
+import {getAllListings, getOffers} from '../../commons/RoutineUpdate';
 
 class ProductDisplay extends React.Component {
   componentWillMount() {
     const { dispatch } = this.props;
-    listingsApi.getAllListings().then((response) => {
-      this.setState({}, () => dispatch({
-        type: GET_ALL_PRODUCTS,
-        products: response.data,
-      }));
-    });
+    getAllListings(dispatch);
+    getOffers(dispatch);
   }
 
   filterProduct = (p, filter) => {

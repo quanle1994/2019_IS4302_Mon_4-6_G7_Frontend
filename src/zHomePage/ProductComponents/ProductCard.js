@@ -8,13 +8,9 @@ import CardActions from '@material-ui/core/CardActions/CardActions';
 import CardContent from '@material-ui/core/CardContent/CardContent';
 import CardMedia from '@material-ui/core/CardMedia/CardMedia';
 import Typography from '@material-ui/core/Typography/Typography';
-import AddIcon from '@material-ui/icons/Add';
 import Button from '@material-ui/core/Button/Button';
 import CardActionArea from '@material-ui/core/CardActionArea/CardActionArea';
 import TextField from '@material-ui/core/TextField/TextField';
-import { MODIFY_CART } from '../../reducers/cartReducer';
-import { OPEN_LEFT_DRAWER } from '../../zSearchbar/Searchbar';
-import ErrorDialog from '../../commons/ErrorDialog';
 import history from '../../history';
 import { OPEN_PRODUCT_VIEWER } from '../../reducers/productsReducer';
 import convert from '../../commons/NumberConverter';
@@ -33,7 +29,7 @@ class ProductCard extends React.Component {
   };
 
   render() {
-    const { classes, product, currentUser } = this.props;
+    const { classes, product, cartItems } = this.props;
     const stdImg = () => (
       <img
         style={{ width: 'auto', margin: 'auto' }}
@@ -51,6 +47,7 @@ class ProductCard extends React.Component {
       />
     );
     const user = localStorage.getItem('username');
+    const isPending = Object.values(cartItems).filter(c => c.deedOffer.status === 'PENDING' && c.deedOffer.title === product.title).length > 0;
     return product.gold !== undefined && (
       <div className={classes.container}>
         <Card>
@@ -61,6 +58,13 @@ class ProductCard extends React.Component {
             >
               <div className={classes.productWrapper}>
                 {product.photoDir === null || product.photoDir === undefined ? stdImg() : orgImg(product.photoDir)}
+
+                {isPending && (
+                  <div className={classes.pendingTag}>
+                    <Typography variant="h2" className={classes.pending}>PENDING</Typography>
+                  </div>
+                )}
+
                 <div className={classes.priceTag}>
                   <Typography variant="h6" className={classes.price}>{`${convert(product.price)} / g`}</Typography>
                 </div>
@@ -146,6 +150,15 @@ const style = () => ({
   },
   price: {
     color: 'white',
+  },
+  pendingTag: {
+    position: 'absolute',
+    top: 115,
+    right: 55,
+    transform: 'rotate(-30deg)',
+  },
+  pending: {
+    color: 'rgba(232,74,95, 0.7)',
   },
   weightTag: {
     position: 'absolute',

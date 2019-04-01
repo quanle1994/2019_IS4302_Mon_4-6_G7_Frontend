@@ -12,6 +12,9 @@ import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import ClickAwayListener from '@material-ui/core/es/ClickAwayListener/ClickAwayListener';
+import { Table, TableCell, TableRow } from '@material-ui/core';
+import sellerApi from '../../api/seller';
+import GoldPurchase from './GoldPurchase';
 
 class MinerCard extends React.Component {
   constructor(props) {
@@ -19,12 +22,21 @@ class MinerCard extends React.Component {
     this.state = {
       hide: false,
       amount: 0,
+      miner: {},
     };
+  }
+
+  componentWillMount() {
+    const { miner } = this.props;
+    if (miner.userId === undefined) return;
+    sellerApi.getMinerWithGold(miner.userId).then((res) => {
+      this.setState({ miner: { ...res.data } });
+    });
   }
 
   render() {
     const { classes, dispatch, miner } = this.props;
-    const { hide, amount } = this.state;
+    const { hide, amount, miner: m } = this.state;
     const stdImg = () => (
       <img
         style={{ width: 'auto', margin: 'auto' }}
@@ -84,10 +96,10 @@ class MinerCard extends React.Component {
               <div className={classes.you}><Typography variant="h6" className={classes.youText}>YOU</Typography></div>
             </CardActions>
           )}
-          {username !== miner.userId && (
+          {username !== miner.userId && localStorage.getItem('type') === 'CertificateAuthority' && (
             <ClickAwayListener onClickAway={hideBox}>
               <CardActions>
-                {!hide && (
+                {!hide && m.goldOwned !== undefined && (
                   <Button
                     variant="outlined"
                     className={classes.button}
@@ -97,17 +109,15 @@ class MinerCard extends React.Component {
                 )}
                 {hide && (
                   <div>
-                    <TextField
-                      type="number"
-                      label="Amount"
-                      variant="outlined"
-                      value={amount}
-                      name="amount"
-                      onChange={handleChange}
-                    />
-                    <Button variant="outlined" className={classes.button} onClick={() => {}}>
-                      Place Order
-                    </Button>
+                    <Table>
+                      {m.goldOwned.map(g => (
+                        <TableRow>
+                          <TableCell>
+                            <GoldPurchase gold={g} miner={m} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </Table>
                   </div>
                 )}
               </CardActions>

@@ -99,7 +99,7 @@ class MoneyTopupDialog extends React.Component {
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
-          {type === 'Registereduser' && (
+          {type === 'RegisteredUser' && (
             <div>
               <TextField
                 className={classes.marginTop}

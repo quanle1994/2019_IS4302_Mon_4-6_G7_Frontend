@@ -5,26 +5,29 @@ import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
 import { SET_CURRENT_PAGE } from '../../reducers/currentPageReducer';
 import Offers from './Offer';
+import { getOffers } from '../../commons/RoutineUpdate';
 
 class OffersSummary extends React.Component {
   componentWillMount() {
-    const { dispatch, offers } = this.props;
+    const { dispatch } = this.props;
     dispatch({
       type: SET_CURRENT_PAGE,
       currentPage: 'offers',
     });
+    getOffers(dispatch);
   }
 
   render() {
     const { classes, dispatch, offers } = this.props;
     const conso = {};
     Object.values(offers).forEach((o) => {
-      let offerList = conso[o.deedToBuy.deedId];
+      const key = `${o.deedToBuy.deedId}-${o.deedOffer.title}-${o.deedOffer.gold.split('#')[1]}-${o.deedOffer.description}`;
+      let offerList = conso[key];
       if (offerList === undefined) offerList = { [o.transactionId]: { ...o } };
       else {
         offerList = { ...offerList, [o.transactionId]: { ...o } };
       }
-      conso[o.deedToBuy.deedId] = { ...offerList };
+      conso[key] = { ...offerList };
     });
     return (
       <div className={classes.container}>

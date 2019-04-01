@@ -29,6 +29,7 @@ import ErrorDialog from '../../commons/ErrorDialog';
 import buyerApi from '../../api/buyer';
 import { MODIFY_CART } from '../../reducers/cartReducer';
 import { SET_OFFERS } from '../../reducers/offerReducer';
+import {getAllAssets, getAllListings, getOffers} from "../../commons/RoutineUpdate";
 
 
 class Offers extends React.Component {
@@ -142,27 +143,12 @@ class Offers extends React.Component {
     listingsApi.acceptOffer({
       deedId: item.id,
       tx: item.tx,
-    }).then(() => SuccessDialog('Accepted Offer', 'Offer', 'accepted', null, () => {
-      const offers = {};
-      buyerApi.getMyOffers().then((res) => {
-        res.data.forEach((o) => {
-          offers[o.transactionId] = o;
-        });
-        dispatch({
-          type: MODIFY_CART,
-          cartItems: { ...offers },
-        });
-      }).catch(e => console.log(e));
-      buyerApi.getMyOffers(localStorage.getItem('username')).then((res) => {
-        res.data.forEach((o) => {
-          offers[o.transactionId] = o;
-        });
-        dispatch({
-          type: SET_OFFERS,
-          offers: { ...offers },
-        });
-      }).catch(e => console.log(e));
-    })).catch(e => ErrorDialog('accepting offer', e));
+    }).then(() => {
+      getOffers(dispatch);
+      getAllListings(dispatch);
+      getAllAssets(dispatch);
+      SuccessDialog('Accepted Offer', 'Offer', 'accepted');
+    }).catch(e => ErrorDialog('accepting offer', e));
   };
 
   render() {
@@ -174,7 +160,7 @@ class Offers extends React.Component {
       filterField: e.target.value,
     });
     const headers = ['Time', 'Deed ID', 'Buyer', 'Price', 'Gold ID', 'Gold Weight', 'Gold Purity', 'Miner', 'CA', 'Action'];
-    const ids = ['time', 'id', 'buyer', 'price', 'goldId', 'goldWeight', 'goldPurity', 'miner', 'ca'];
+    const ids = ['time', 'id', 'buyer', 'price', 'goldId', 'goldWeight', 'goldPurity', 'miner', 'ca', 'status'];
     const handleChangePage = (event, p) => { this.setState({ page: p }); };
     const handleChangeRowsPerPage = (event) => {
       this.setState({
@@ -239,20 +225,32 @@ class Offers extends React.Component {
             <TableBody className={classes.tableBody}>
               {items.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map(item => (
                 <TableRow>
-                  {ids.map(id => (
-                    <TableCell padding="dense">{item[id]}</TableCell>
-                  ))}
-                  <TableCell padding="dense">
-                    {item.status === 'PENDING' && (
-                      <Button
-                        // variant="outlined"
-                        variant="contained"
-                        color="secondary"
-                        onClick={() => this.handleAcceptOffer(item)}
-                      >Accept
-                      </Button>
-                    )}
-                  </TableCell>
+                  {ids.map((id, ind) => {
+                    if (ind < ids.length - 1) {
+                      return (
+                        <TableCell padding="dense">{item[id]}</TableCell>
+                      );
+                    }
+                    return (
+                      <TableCell padding="dense">
+                        {item.status === 'PENDING' && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => this.handleAcceptOffer(item)}
+                          >Accept
+                          </Button>
+                        )}
+                        {item.status !== 'PENDING' && (
+                          <Button
+                            variant="outlined"
+                            color={item.status === 'APPROVED' ? 'primary' : 'secondary'}
+                          >{item.status}
+                          </Button>
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableBody>

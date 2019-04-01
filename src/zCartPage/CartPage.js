@@ -20,10 +20,13 @@ import TableFooter from '@material-ui/core/TableFooter/TableFooter';
 import TablePagination from '@material-ui/core/TablePagination/TablePagination';
 import TablePaginationActions from '@material-ui/core/TablePagination/TablePaginationActions';
 import { fade } from '@material-ui/core/styles/colorManipulator';
+import { Button } from '@material-ui/core';
 import { SET_CURRENT_PAGE } from '../reducers/currentPageReducer';
 import convert, { convertDateTime } from '../commons/NumberConverter';
-import { OPEN_PAYMENT_DIALOG } from '../reducers/cartReducer';
-import {Button} from "@material-ui/core";
+import { MODIFY_CART } from '../reducers/cartReducer';
+import buyerApi from '../api/buyer';
+import { SET_OFFERS } from '../reducers/offerReducer';
+import {getAllAssets, getAllListings, getOffers} from "../commons/RoutineUpdate";
 
 class CartPage extends React.Component {
   constructor(props) {
@@ -40,18 +43,16 @@ class CartPage extends React.Component {
   }
 
   componentWillMount() {
-    const { dispatch, cartItems, payment } = this.props;
+    const { dispatch, cartItems } = this.props;
     dispatch({
       type: SET_CURRENT_PAGE,
       currentPage: 'shopping_cart',
     });
     const items = this.transform(cartItems);
     this.setState({ items });
-    if (payment !== undefined) {
-      dispatch({
-        type: OPEN_PAYMENT_DIALOG,
-      });
-    }
+    getOffers(dispatch);
+    getAllListings(dispatch);
+    getAllAssets(dispatch);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -67,7 +68,7 @@ class CartPage extends React.Component {
     time: convertDateTime(obj.timestamp),
     id: obj.deedToBuy.deedId,
     title: obj.deedOffer.title,
-    owner: obj.deedOffer.owner,
+    owner: obj.deedOffer.owner.name,
     price: obj.deedOffer.offerPrice,
     goldId: obj.deedToBuy.gold.goldId,
     goldWeight: obj.deedOffer.goldWeight,
@@ -146,15 +147,15 @@ class CartPage extends React.Component {
       filterField: e.target.value,
     });
     const headers = ['Time', 'Deed ID', 'Product Name', 'Owner', 'Price', 'Gold ID', 'Gold Weight', 'Gold Purity', 'Miner', 'CA', 'Status'];
-    const ids = ['time', 'id', 'title', 'owner', 'price', 'goldId', 'goldWeight', 'goldPurity', 'miner', 'ca'];
+    const ids = ['time', 'id', 'title', 'owner', 'price', 'goldId', 'goldWeight', 'goldPurity', 'miner', 'ca', 'status'];
     const handleChangePage = (event, p) => { this.setState({ page: p }); };
     const handleChangeRowsPerPage = (event) => {
       this.setState({
         rowsPerPage: event.target.value,
       });
     };
-    const number = items.filter(i => i.status !== 'ACCEPTED').reduce((a, b) => parseFloat(a) + parseFloat(b.price), 0);
-    const accepted = items.filter(i => i.status === 'ACCEPTED').reduce((a, b) => parseFloat(a) + parseFloat(b.price), 0);
+    const number = items.filter(i => i.status === 'PENDING').reduce((a, b) => parseFloat(a) + parseFloat(b.price), 0);
+    const accepted = items.filter(i => i.status === 'APPROVED').reduce((a, b) => parseFloat(a) + parseFloat(b.price), 0);
     return (
       <div className={classes.container}>
         <div style={{
@@ -213,17 +214,23 @@ class CartPage extends React.Component {
             <TableBody className={classes.tableBody}>
               {items.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map(item => (
                 <TableRow>
-                  {ids.map(id => (
-                    <TableCell padding="dense">{item[id]}</TableCell>
-                  ))}
-                  <TableCell padding="dense">
-                    <Button
-                      variant={item.status === 'PENDING' ? 'outlilned' : 'contained'}
-                      color={item.status === 'PENDING' ? '' : item.status === 'ACCEPTED' ? 'primary' : 'secondary'}
-                    >
-                      {item.status}
-                    </Button>
-                  </TableCell>
+                  {ids.map((id, ind) => {
+                    if (ind < ids.length - 1) {
+                      return (
+                        <TableCell padding="dense">{item[id]}</TableCell>
+                      );
+                    }
+                    return (
+                      <TableCell padding="dense">
+                        <Button
+                          variant={item.status === 'PENDING' ? 'outlilned' : 'contained'}
+                          color={item.status === 'PENDING' ? '' : item.status === 'APPROVED' ? 'primary' : 'secondary'}
+                        >
+                          {item.status}
+                        </Button>
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableBody>
@@ -242,10 +249,10 @@ class CartPage extends React.Component {
                 <TableCell
                   colSpan={3}
                 >
-                  <div style={{overflow: 'hidden'}}>
+                  <div style={{ overflow: 'hidden' }}>
                     <Typography variant="h6" className={classes.totalText}>Pending:&nbsp;{convert(number)}</Typography>
                   </div>
-                  <div style={{overflow: 'hidden'}}>
+                  <div style={{ overflow: 'hidden' }}>
                     <Typography variant="h6" className={classes.acceptedText}>Paid:&nbsp;{convert(accepted)}</Typography>
                   </div>
                 </TableCell>

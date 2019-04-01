@@ -72,7 +72,7 @@ class ProductViewer extends React.Component {
 
   render() {
     const {
-      classes, products, productViewerOpen, pId, dispatch,
+      classes, products, productViewerOpen, pId, dispatch, cartItems,
     } = this.props;
     const { price } = this.state;
     if (pId <= 0) return null;
@@ -87,6 +87,8 @@ class ProductViewer extends React.Component {
       ['Seller', product.currentOwner.name],
       ['Gold Purity', product.purity],
     ];
+    const pendingOffers = Object.values(cartItems).filter(c => c.deedOffer.status === 'PENDING' && c.deedOffer.title === product.title);
+    const isPending = pendingOffers.length > 0;
     // const comments = product === undefined ? [] : product.comments;
     const stdImg = () => (
       <img
@@ -187,14 +189,15 @@ class ProductViewer extends React.Component {
         <DialogActions>
           {type === 'RegisteredUser' && product.currentOwner.userId !== localStorage.getItem('username') && (
           <TextField
-            variant="outlined"
+            variant={isPending ? 'filled' : 'outlined'}
             label="Offer Price"
-            value={price}
+            value={isPending ? pendingOffers[0].deedOffer.offerPrice : price}
             name="price"
+            InputProps={{ readOnly: isPending }}
             onChange={handleOnchange}
           />
           )}
-          {type === 'RegisteredUser' && product.currentOwner.userId !== localStorage.getItem('username') && (
+          {type === 'RegisteredUser' && product.currentOwner.userId !== localStorage.getItem('username') && !isPending && (
           <Button
             variant="contained"
             color="primary"
@@ -260,6 +263,7 @@ const mapStateToProps = state => ({
   productViewerOpen: state.products.productViewerOpen,
   pId: state.products.pId,
   isView: state.products.isView,
+  cartItems: state.cart.cartItems,
 });
 
 const mapDispatchToProps = dispatch => ({ dispatch });

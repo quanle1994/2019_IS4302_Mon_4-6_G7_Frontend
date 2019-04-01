@@ -27,7 +27,7 @@ class OwnershipPaper extends React.Component {
       classes, cartItems, userAssets, dispatch,
     } = this.props;
     const { goldOwned, deedOwned, money } = userAssets;
-    const avail = Object.values(cartItems).filter(o => o.status === 'PENDING').reduce((a, b) => a + b.offerPrice, 0);
+    const avail = parseFloat(Object.values(cartItems).filter(o => o.deedOffer.status === 'PENDING').reduce((a, b) => a + b.deedOffer.offerPrice, 0));
     return (
       <Paper className={classes.ownership}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'row' }}>
@@ -40,7 +40,7 @@ class OwnershipPaper extends React.Component {
             })}
           >Your Assets
           </Typography>
-          {(money !== undefined && !isNaN(money)) && localStorage.getItem('type') === 'RegisteredUser' && (
+          {(money !== undefined && !isNaN(money)) && (
           <TextField
             type="String"
             style={{

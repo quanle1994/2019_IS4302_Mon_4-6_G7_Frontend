@@ -91,6 +91,12 @@ const topupGold = data => api
     { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
+const getMinerWithGold = id => api
+  .get(
+    `/getMinerWithGold/${id}`,
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
 export default {
   createProduct,
   getOrders,
@@ -105,4 +111,5 @@ export default {
   getAllCas,
   convertGoldToDeed,
   topupGold,
+  getMinerWithGold,
 };
