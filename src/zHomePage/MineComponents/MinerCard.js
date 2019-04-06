@@ -131,7 +131,7 @@ class MinerCard extends React.Component {
 
 const style = () => ({
   container: {
-    width: 282,
+    width: 450,
     flex: 'none',
     margin: 10,
     float: 'left',

@@ -176,7 +176,7 @@ class Searchbar extends React.Component {
     const offersCount = Object.values(offers).filter(o => o.deedOffer.status === 'PENDING').length;
     const publicTabs = ['Browse All Gold', 'Shopping Cart', 'Offers', 'Our Mines', 'Certificate Authorities'];
     const adminTabs = ['Browse All Gold', 'Join Requests', 'Our Mines', 'Certificate Authorities'];
-    const minerTabs = ['Browse All Gold', 'Our Mines', 'Certificate Authorities'];
+    const minerTabs = ['Browse All Gold', 'Gold Requests', 'Our Mines', 'Certificate Authorities'];
     const caTabs = ['Browse All Gold', 'Offers', 'Our Mines', 'Certificate Authorities'];
     const type = localStorage.getItem('type');
     const tabs = type === 'ADMIN' ? adminTabs : type === 'Miner' ? minerTabs : type === 'CertificateAuthority' ? caTabs : publicTabs;

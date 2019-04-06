@@ -4,7 +4,7 @@ import { SET_OFFERS } from '../reducers/offerReducer';
 import listingsApi from '../api/listings';
 import { GET_ALL_PRODUCTS } from '../reducers/productsReducer';
 import sellerApi from '../api/seller';
-import { SET_ASSETS } from '../reducers/userAssetsReducer';
+import { SET_ASSETS, SET_GOLD_REQUESTS } from '../reducers/userAssetsReducer';
 
 export const getOffers = (dispatch) => {
   const offers = {};
@@ -40,5 +40,19 @@ export const getAllAssets = (dispatch) => {
   sellerApi.getAllAssets().then(res => dispatch({
     type: SET_ASSETS,
     assets: { ...res.data },
+  }));
+};
+
+export const getMinerGoldRequests = (dispatch) => {
+  sellerApi.getGoldRequests().then(res => dispatch({
+    type: SET_GOLD_REQUESTS,
+    goldRequests: res.data,
+  }));
+};
+
+export const getCASaleRequests = (dispatch) => {
+  sellerApi.getAllSaleRequests().then(res => dispatch({
+    type: SET_GOLD_REQUESTS,
+    goldRequests: res.data,
   }));
 };

@@ -2,11 +2,11 @@ import React from 'react';
 import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
 import connect from 'react-redux/es/connect/connect';
-import Typography from '@material-ui/core/Typography/Typography';
 import { SET_CURRENT_PAGE } from '../../reducers/currentPageReducer';
 import sellerApi from '../../api/seller';
 import { SET_MINERS } from '../../reducers/usersReducer';
 import MinerCard from './MinerCard';
+import { getCASaleRequests } from '../../commons/RoutineUpdate';
 
 class MineCatalogue extends React.Component {
   componentWillMount() {
@@ -20,6 +20,7 @@ class MineCatalogue extends React.Component {
       type: SET_MINERS,
       miners: res.data,
     })).catch(e => console.log(e));
+    if (localStorage.getItem('type') === 'CertificateAuthority') getCASaleRequests(dispatch);
   }
 
   render() {

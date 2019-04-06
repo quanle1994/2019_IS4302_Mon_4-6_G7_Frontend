@@ -65,6 +65,13 @@ const topupRequest = data => api
     { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
+const topupRequestCa = data => api
+  .post(
+    'increaseCashCa',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
 const buyGoldRequest = data => api
   .post(
     'buyGoldRequest',
@@ -82,5 +89,6 @@ export default {
   offer,
   getMyOffers,
   topupRequest,
+  topupRequestCa,
   buyGoldRequest,
 };

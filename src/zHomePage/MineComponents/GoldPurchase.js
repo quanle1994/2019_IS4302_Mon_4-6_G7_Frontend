@@ -8,13 +8,28 @@ import TextField from '@material-ui/core/TextField';
 import sellerApi from '../../api/buyer';
 import ErrorDialog from '../../commons/ErrorDialog';
 import SuccessDialog from '../../commons/SuccessDialog';
+import { getCASaleRequests } from '../../commons/RoutineUpdate';
+import convert from '../../commons/NumberConverter';
 
 class GoldPurchase extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       amount: 0,
+      isPending: false,
     };
+  }
+
+  componentWillMount() {
+    const { goldRequests, gold } = this.props;
+    const req = goldRequests.filter(g => g.gold.goldId === gold.goldId && g.verificationState === 'PENDING');
+    if (req.length !== 0) this.setState({ amount: req[0].goldWeight, isPending: true });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { goldRequests, gold } = nextProps;
+    const req = goldRequests.filter(g => g.gold.goldId === gold.goldId && g.verificationState === 'PENDING');
+    if (req.length !== 0) this.setState({ amount: req[0].goldWeight, isPending: true });
   }
 
   handleAmountChange = (e, max) => {
@@ -25,34 +40,50 @@ class GoldPurchase extends React.Component {
 
   handleOrderGold = () => {
     const { amount } = this.state;
-    const { dispatch, miner, gold } = this.props;
+    const { miner, gold, dispatch } = this.props;
     sellerApi.buyGoldRequest({
-      gold: gold.goldId,
+      goldId: gold.goldId,
       minerId: miner.userId,
       goldWeight: amount,
-    }).then(
-      () => SuccessDialog('Placed Gold Purchase Order Successfully', 'Gold order', 'lodged'),
-    ).catch(e => ErrorDialog('placing gold purchase order', e));
+    }).then(() => {
+      getCASaleRequests(dispatch);
+      SuccessDialog('Placed Gold Purchase Order Successfully', 'Gold order', 'lodged');
+    }).catch(e => ErrorDialog('placing gold purchase order', e));
   };
 
   render() {
     const {
-      classes, gold
+      classes, gold,
     } = this.props;
-    const { amount } = this.state;
+    const { amount, isPending } = this.state;
     return (
       <div className={classes.container}>
-        <TextField
-          type="number"
-          label={`Gold ${gold.goldPurity} - ${gold.goldWeight} g`}
-          variant="outlined"
-          value={amount}
-          name="amount"
-          onChange={e => this.handleAmountChange(e, gold.goldWeight)}
-        />
-        <Button variant="outlined" color="primary" className={classes.button} onClick={this.handleOrderGold}>
-          Place Order
-        </Button>
+        <div className={classes.wrapper}>
+          <TextField
+            className={classes.textField}
+            type="number"
+            label={`Gold ${gold.goldPurity} - ${gold.goldWeight} g`}
+            variant={isPending ? 'filled' : 'outlined'}
+            value={amount}
+            name="amount"
+            InputProps={{ readOnly: isPending }}
+            onChange={e => this.handleAmountChange(e, gold.goldWeight)}
+          />
+          <TextField
+            className={classes.textField}
+            type="string"
+            label={`$ ${gold.price} / g):`}
+            variant="filled"
+            value={convert(gold.price * amount)}
+            name="amount"
+            InputProps={{ readOnly: true }}
+          />
+        </div>
+        {!isPending && (
+          <Button variant="outlined" color="primary" className={classes.button} onClick={this.handleOrderGold}>
+            Place Order
+          </Button>
+        )}
       </div>
     );
   }
@@ -65,10 +96,21 @@ const style = () => ({
   },
   button: {
     marginTop: 10,
+    marginBottom: 5,
+  },
+  wrapper: {
+    width: '100%',
+  },
+  textField: {
+    width: '48%',
+    marginRight: 5,
+    boxSizing: 'border',
   },
 });
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => ({
+  goldRequests: state.userAssets.goldRequests,
+});
 
 const mapDispatchToProps = dispatch => ({ dispatch });
 

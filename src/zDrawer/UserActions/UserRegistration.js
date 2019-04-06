@@ -14,7 +14,7 @@ import ErrorDialog from '../../commons/ErrorDialog';
 import InvalidationDialog from '../../commons/InvalidationDialog';
 import loginApi from '../../api/login';
 import SuccessDialog from '../../commons/SuccessDialog';
-import {CLOSE_LEFT_DRAWER, SET_CURRENT_USER} from '../SideDrawer';
+import { CLOSE_LEFT_DRAWER, SET_CURRENT_USER } from '../SideDrawer';
 import history from '../../history';
 
 export const CLOSE_REGISTRATION_FORM = 'CLOSE_REGISTRATION_FORM';
@@ -23,11 +23,11 @@ class UserRegistration extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      fullname: '',
+      userId: '',
+      name: '',
       email: '',
       address: '',
-      gender: '',
-      type: 2,
+      type: 'RegisteredUser',
       password: '',
       confirmPassword: '',
     };
@@ -36,7 +36,7 @@ class UserRegistration extends React.Component {
   handleRegister = () => {
     const { dispatch } = this.props;
     const {
-      username, fullname, email, address, gender, type, birthday, password, confirmPassword,
+      userId, name, email, address, type, password, confirmPassword,
     } = this.state;
     if (confirmPassword !== password) {
       InvalidationDialog('Password does not match!');
@@ -47,24 +47,22 @@ class UserRegistration extends React.Component {
       return;
     }
     const user = {
-      username, fullname, emailAddress: email, address, gender, dob: new Date(birthday).getTime(), type, password,
+      userId, name, email, address, type, password,
     };
-    loginApi.register(user).then((response) => {
-      SuccessDialog('User Registration Successful', `User ${username}`, 'registered');
-      const currentUser = response.data;
-      localStorage.setItem('user', JSON.stringify(currentUser));
-      localStorage.setItem('id', currentUser.id);
-      localStorage.setItem('fullname', currentUser.fullname);
-      localStorage.setItem('token', `${username}|||${password}`);
-      localStorage.setItem('photoDir', currentUser.photoDir);
-      localStorage.setItem('type', currentUser.type);
-      localStorage.setItem('emailAddress', currentUser.emailAddress);
-      localStorage.setItem('gender', currentUser.gender);
-      localStorage.setItem('cart', currentUser.cartString);
-      this.setState({}, () => dispatch({
-        type: SET_CURRENT_USER,
-        currentUser,
-      }));
+    loginApi.register(user).then(() => {
+      SuccessDialog('User Registration Successfully Lodged', `User ${userId}`, 'queued for processing');
+      // const currentUser = response.data;
+      // localStorage.setItem('user', JSON.stringify(currentUser));
+      // localStorage.setItem('username', currentUser.username);
+      // localStorage.setItem('name', currentUser.name);
+      // localStorage.setItem('auth', currentUser.auth);
+      // localStorage.setItem('photoDir', currentUser.photoDir);
+      // localStorage.setItem('type', currentUser.type);
+      // localStorage.setItem('email', currentUser.email);
+      // this.setState({}, () => dispatch({
+      //   type: SET_CURRENT_USER,
+      //   currentUser,
+      // }));
       setTimeout(() => {
         dispatch({
           type: CLOSE_REGISTRATION_FORM,
@@ -79,7 +77,7 @@ class UserRegistration extends React.Component {
 
   render() {
     const {
-      fullname, email, address, gender, type, password, confirmPassword,
+      userId, name, email, address, gender, type, password, confirmPassword,
     } = this.state;
     const { classes, dispatch, registrationOpen } = this.props;
     const handleCloseForm = () => {
@@ -106,6 +104,16 @@ class UserRegistration extends React.Component {
             <AccountCircle className={classes.icon} />
           </div>
           <TextField
+            fullWidth
+            className={classes.input}
+            autoFocus
+            label="User Name"
+            name="userId"
+            type="text"
+            value={userId}
+            onChange={handleChange}
+          />
+          <TextField
             error={emailError}
             fullWidth
             className={classes.inputHalfLeft}
@@ -120,8 +128,8 @@ class UserRegistration extends React.Component {
             className={classes.inputHalfRight}
             label="Full Name"
             type="text"
-            name="fullname"
-            value={fullname}
+            name="name"
+            value={name}
             onChange={handleChange}
           />
           <TextField
@@ -151,9 +159,9 @@ class UserRegistration extends React.Component {
             value={type}
             onChange={handleChange}
           >
-            <MenuItem value={0} key={0}>MINER</MenuItem>
-            <MenuItem value={1} key={1}>CERTIFYING AUTHORITY</MenuItem>
-            <MenuItem value={2} key={2}>COMMERICIAL USER</MenuItem>
+            <MenuItem value="Miner" key={0}>MINER</MenuItem>
+            <MenuItem value="CertificateAuthority" key={1}>CERTIFICATE AUTHORITY</MenuItem>
+            <MenuItem value="RegisteredUser" key={2}>COMMERICIAL USER</MenuItem>
           </TextField>
           {type === 2 && (
             <TextField

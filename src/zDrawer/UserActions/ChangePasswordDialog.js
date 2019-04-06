@@ -28,7 +28,7 @@ class ChangePasswordDialog extends React.Component {
     const { oldPassword, confirmPassword, newPassword } = this.state;
     if (oldPassword !== confirmPassword) InvalidationDialog('Old password does not match');
     const req = {
-      id: localStorage.getItem('id'),
+      type: localStorage.getItem('type'),
       password: oldPassword,
       newPassword,
     };

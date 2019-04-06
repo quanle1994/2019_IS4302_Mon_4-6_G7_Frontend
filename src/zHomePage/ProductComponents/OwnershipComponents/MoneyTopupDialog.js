@@ -6,6 +6,7 @@ import connect from 'react-redux/es/connect/connect';
 import {
   Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField,
 } from '@material-ui/core';
+import MenuItem from '@material-ui/core/MenuItem';
 import { CLOSE_MONEY_TOPUP } from '../../../reducers/currentPageReducer';
 import convert from '../../../commons/NumberConverter';
 import buyerApi from '../../../api/buyer';
@@ -21,12 +22,14 @@ class MoneyTopupDialog extends React.Component {
       amount: 0,
       weight: 0,
       purity: 0,
+      price: 0,
       regUser: '',
+      isCash: 1,
     };
   }
 
   handleTopup = () => {
-    const { amount } = this.state;
+    const { amount, isCash } = this.state;
     const { dispatch } = this.props;
     const type = localStorage.getItem('type');
 
@@ -43,13 +46,29 @@ class MoneyTopupDialog extends React.Component {
           }));
         }).catch(e => console.log(e));
       }).catch(e => ErrorDialog('updating cash', e));
+    } else if (type === 'CertificateAuthority' && isCash) {
+      buyerApi.topupRequestCa({ amount }).then(() => {
+        sellerApi.getAllAssets().then((res) => {
+          SuccessDialog('Updated Cash Successfully', 'Cash balance', 'topped up', null,
+            () => dispatch({
+              type: CLOSE_MONEY_TOPUP,
+            }));
+          this.setState({ ...res.data }, () => dispatch({
+            type: SET_ASSETS,
+            assets: { ...res.data },
+          }));
+        }).catch(e => console.log(e));
+      }).catch(e => ErrorDialog('updating cash', e));
     } else if (type === 'CertificateAuthority') {
-      const { weight, purity, regUser } = this.state;
+      const {
+        weight, purity, regUser, price,
+      } = this.state;
       sellerApi.convertGoldToDeed({
         weight,
         ca: localStorage.getItem('username'),
         purity,
         regUser,
+        price,
       }).then(() => {
         SuccessDialog('Convert Gold Successfully', 'Gold', 'converted to deed', '',
           () => dispatch({
@@ -62,8 +81,8 @@ class MoneyTopupDialog extends React.Component {
           }))).catch(e => console.log(e));
       }).catch(e => ErrorDialog('converting gold to deed', e));
     } else if (type === 'Miner') {
-      const { weight, purity } = this.state;
-      sellerApi.topupGold({ weight, purity }).then(() => {
+      const { weight, purity, price } = this.state;
+      sellerApi.topupGold({ weight, purity, price }).then(() => {
         sellerApi.getAllAssets().then(res => this.setState({ ...res.data },
           () => dispatch({
             type: SET_ASSETS,
@@ -82,7 +101,7 @@ class MoneyTopupDialog extends React.Component {
       classes, dispatch, moneyTopup, userAssets, cartItems,
     } = this.props;
     const {
-      amount, weight, purity, regUser,
+      amount, weight, purity, regUser, price, isCash,
     } = this.state;
     const handleChange = e => this.setState({
       [e.target.name]: e.target.value,
@@ -99,7 +118,19 @@ class MoneyTopupDialog extends React.Component {
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
-          {type === 'RegisteredUser' && (
+          {type === 'CertificateAuthority' && (
+            <TextField
+              name="isCash"
+              select
+              value={isCash}
+              onChange={handleChange}
+              fullWidth
+            >
+              <MenuItem value={1} label="Cash Top Up">Cash Top Up</MenuItem>
+              <MenuItem value={0} label="Gold Conversion To Deed">Gold Conversion To Deed</MenuItem>
+            </TextField>
+          )}
+          {(type === 'RegisteredUser' || type === 'CertificateAuthority') && isCash === 1 && (
             <div>
               <TextField
                 className={classes.marginTop}
@@ -129,7 +160,7 @@ class MoneyTopupDialog extends React.Component {
               />
             </div>
           )}
-          {type === 'CertificateAuthority' && (
+          {type === 'CertificateAuthority' && !isCash && (
             <div>
               <TextField
                 className={classes.marginTop}
@@ -156,6 +187,16 @@ class MoneyTopupDialog extends React.Component {
                 type="Number"
                 name="purity"
                 value={purity}
+                fullWidth
+                onChange={handleChange}
+              />
+              <TextField
+                className={classes.marginTop}
+                variant="outlined"
+                label="Gold's Unit Price"
+                type="Number"
+                name="price"
+                value={price}
                 fullWidth
                 onChange={handleChange}
               />
@@ -198,6 +239,16 @@ class MoneyTopupDialog extends React.Component {
                 type="Number"
                 name="purity"
                 value={purity}
+                fullWidth
+                onChange={handleChange}
+              />
+              <TextField
+                className={classes.marginTop}
+                variant="outlined"
+                label="Gold's Unit Price"
+                type="Number"
+                name="price"
+                value={price}
                 fullWidth
                 onChange={handleChange}
               />

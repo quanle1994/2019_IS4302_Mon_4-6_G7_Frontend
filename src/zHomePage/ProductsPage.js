@@ -20,6 +20,7 @@ import CreateDeedDialog from './ProductComponents/DeedDialogComponents/CreateDee
 import ListDeedDialog from './ProductComponents/DeedDialogComponents/ListDeedDialog';
 import OffersSummary from './OfferComponents/OffersSummary';
 import MoneyTopupDialog from './ProductComponents/OwnershipComponents/MoneyTopupDialog';
+import RequestSummary from "./GoldRequestsComponents/RequestSummary";
 
 class ProductsPage extends React.Component {
   constructor(props) {
@@ -104,6 +105,7 @@ class ProductsPage extends React.Component {
             <Route exact path="/browse_all_gold" component={ProductCarousel} />
             <Route exact path="/our_mines" component={MineCatalogue} />
             <Route exact path="/offers" component={OffersSummary} />
+            <Route exact path="/gold_requests" component={RequestSummary} />
             <Route exact path="/certificate_authorities" component={VerifiedSellers} />
             <Route exact path="/shopping_cart" component={CartPage} />
             <Route path="/view/:pId" component={ProductCarousel} />

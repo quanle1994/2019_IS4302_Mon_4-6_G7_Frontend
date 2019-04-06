@@ -15,23 +15,23 @@ const login = (username, password) => api
 
 const register = user => api
   .post(
-    'register',
+    '/register',
     { ...user },
-    { headers: { Authorisation: localStorage.getItem('token') } },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
 const updateUser = user => api
   .post(
-    'updateUser',
+    '/updateDetails',
     { ...user },
-    { headers: { Authorisation: localStorage.getItem('token') } },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
 const changePassword = req => api
   .post(
-    'changePassword',
+    '/updatePassword',
     { ...req },
-    { headers: { Authorisation: localStorage.getItem('token') } },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
 export default {

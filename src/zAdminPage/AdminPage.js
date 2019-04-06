@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-one-expression-per-line */
 import React from 'react';
 import { compose } from 'redux';
 import withStyles from '@material-ui/core/es/styles/withStyles';
@@ -23,6 +24,7 @@ import TextField from '@material-ui/core/TextField/TextField';
 import { SET_CURRENT_PAGE } from '../reducers/currentPageReducer';
 import ErrorDialog from '../commons/ErrorDialog';
 import adminApi from '../api/admin';
+import SuccessDialog from '../commons/SuccessDialog';
 
 export const GET_ALL_USERS = 'GET_ALL_USERS';
 class AdminPage extends React.Component {
@@ -57,11 +59,11 @@ class AdminPage extends React.Component {
   getAllUsers() {
     const { dispatch } = this.props;
     adminApi.getAllUsers().then(response => this.setState({
-      users: response.data,
+      users: this.transform(response.data),
     }, () => {
       dispatch({
         type: GET_ALL_USERS,
-        data: response.data,
+        data: this.transform(response.data),
       });
     })).catch(error => ErrorDialog('getting all users', error));
   }
@@ -125,25 +127,40 @@ class AdminPage extends React.Component {
     });
   };
 
+  transform = data => data.map(obj => ({
+    userId: obj.userId,
+    name: obj.name,
+    email: obj.email,
+    address: obj.address,
+    type: obj.$class.split('goldchain.')[1],
+    status: obj.status,
+  }));
+
   render() {
     const { classes } = this.props;
     const {
       page, rowsPerPage, users, order, filterField,
     } = this.state;
-    const headers = ['ID', 'Full Name', 'Email', 'Type', 'Status', 'Action'];
-    const ids = ['userId', 'name', 'email', '$class', 'status'];
+    const headers = ['User Name', 'Full Name', 'Email', 'Address', 'Type', 'Status', 'Action'];
+    const ids = ['userId', 'name', 'email', 'address', 'type', 'status'];
     const handleChangePage = (event, page) => { this.setState({ page }); };
     const handleChangeRowsPerPage = (event) => {
       this.setState({
         rowsPerPage: event.target.value,
       });
     };
-    const handleToggle = id => adminApi.toggleActivity(id)
-      .then(() => this.getAllUsers()).catch(error => ErrorDialog('changing user\'s activity', error));
-    const formatDate = (rawValue) => {
-      const value = new Date(rawValue);
-      return value.toDateString();
-    };
+    const handleToggle = row => adminApi.toggleActivity({
+      userId: row.userId,
+      type: row.type,
+      status: row.status === 'PENDING_APPROVAL' ? 'ACTIVE' : 'DEACTIVATED',
+    }).then(() => {
+      this.getAllUsers();
+      SuccessDialog(`User has been ${row.status === 'PENDING_APPROVAL' ? 'ACTIVATED' : 'DEACTIVATED'}`, 'User', 'updated');
+    }).catch(error => ErrorDialog('changing user\'s activity', error));
+    // const formatDate = (rawValue) => {
+    //   const value = new Date(rawValue);
+    //   return value.toDateString();
+    // };
     const handleChangeFilterField = e => this.setState({
       filterField: e.target.value,
     });
@@ -200,15 +217,30 @@ class AdminPage extends React.Component {
             <TableBody className={classes.tableBody}>
               {users.slice(page * rowsPerPage, (page + 1) * rowsPerPage).map(user => (
                 <TableRow>
-                  {ids.map(id => (
-                    <TableCell padding="dense">
-                      {id === '$class' ? user[id].split('goldchain.')[1] : user[id]}
-                    </TableCell>
-                  ))}
+                  {ids.map((id, ind) => {
+                    if (ind < ids.length - 1) {
+                      return (
+                        <TableCell padding="dense">
+                          {id === '$class' ? user[id].split('goldchain.')[1] : user[id]}
+                        </TableCell>
+                      );
+                    }
+                    return (
+                      <TableCell padding="dense">
+                        <Button
+                          variant="outlined"
+                          color={user.status === 'DEACTIVATED' ? 'default' : user.status === 'PENDING_APPROVAL' ? 'secondary' : 'primary'}
+                        >{user.status}
+                        </Button>
+                      </TableCell>
+                    );
+                  })}
                   <TableCell padding="dense">
                     <Button
-                      variant="outlined"
-                    >ACTIVATE
+                      variant="contained"
+                      color={user.status === 'DEACTIVATED' || user.status === 'PENDING_APPROVAL' ? 'primary' : 'secondary'}
+                      onClick={() => handleToggle(user)}
+                    >{user.status === 'DEACTIVATED' || user.status === 'PENDING_APPROVAL' ? 'ACTIVATE' : 'DEACTIVATE'}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -251,7 +283,7 @@ const style = theme => ({
     marginBottom: 20,
   },
   wrapper: {
-    width: '70%',
+    width: '90%',
     margin: 'auto',
     backgroundColor: '#FECEAB',
   },

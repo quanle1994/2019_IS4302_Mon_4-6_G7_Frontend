@@ -97,6 +97,25 @@ const getMinerWithGold = id => api
     { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
+const getAllSaleRequests = () => api
+  .get(
+    '/getGoldRequest',
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const getGoldRequests = () => api
+  .get(
+    '/getMinerGoldRequests',
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
+const minerSellsGold = data => api
+  .post(
+    '/minerSellsGold',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
+  );
+
 export default {
   createProduct,
   getOrders,
@@ -112,4 +131,7 @@ export default {
   convertGoldToDeed,
   topupGold,
   getMinerWithGold,
+  getAllSaleRequests,
+  getGoldRequests,
+  minerSellsGold,
 };

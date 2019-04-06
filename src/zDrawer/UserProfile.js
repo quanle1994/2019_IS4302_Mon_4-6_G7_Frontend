@@ -7,7 +7,6 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import Typography from '@material-ui/core/Typography/Typography';
 import TextField from '@material-ui/core/TextField/TextField';
 import Button from '@material-ui/core/Button/Button';
-import MenuItem from '@material-ui/core/MenuItem/MenuItem';
 import SuccessDialog from '../commons/SuccessDialog';
 import { CLOSE_LEFT_DRAWER, SET_CURRENT_USER } from './SideDrawer';
 import history from '../history';
@@ -26,32 +25,18 @@ class UserProfile extends React.Component {
     const { currentUser } = this.props;
     this.setState({
       ...currentUser,
-      gender: currentUser.genderByte,
     });
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { currentUser } = nextProps;
-    this.setState({
-      gender: currentUser.genderByte,
-    });
-    console.log(this.state);
   }
 
   handleSetCurrentUser = (user) => {
     const { dispatch } = this.props;
     const currentUser = user;
     localStorage.setItem('user', JSON.stringify(currentUser));
-    localStorage.setItem('id', currentUser.id);
-    localStorage.setItem('fullname', currentUser.fullname);
-    localStorage.setItem('token', `${currentUser.username}|||${currentUser.password}`);
+    localStorage.setItem('name', currentUser.name);
     localStorage.setItem('photoDir', currentUser.photoDir);
     localStorage.setItem('username', currentUser.username);
-    localStorage.setItem('type', currentUser.type);
-    localStorage.setItem('emailAddress', currentUser.emailAddress);
-    localStorage.setItem('gender', currentUser.gender);
-    localStorage.setItem('dob', currentUser.dob);
-    localStorage.setItem('cart', currentUser.cartString);
+    localStorage.setItem('address', currentUser.address);
+    localStorage.setItem('email', currentUser.email);
     dispatch({
       type: SET_CURRENT_USER,
       currentUser,
@@ -60,10 +45,10 @@ class UserProfile extends React.Component {
 
   handleUpdateUser = () => {
     const {
-      id, username, fullname, emailAddress, address, gender, dob,
+      id, name, email, address,
     } = this.state;
     const updateReq = {
-      id, username, fullname, emailAddress, address, gender, dob,
+      id, name, email, address, type: localStorage.getItem('type'),
     };
     loginApi.updateUser(updateReq).then((response) => {
       this.handleSetCurrentUser(response.data);
@@ -105,49 +90,35 @@ class UserProfile extends React.Component {
           <img alt="profile" src={currentUser.photoDir} />
         )}
         <Typography variant="h4">
-          User Profile
+          User Profile: {currentUser.username}
         </Typography>
         <TextField
-          fullWidth
-          className={classes.input}
-          label="Email / User Name"
-          type="text"
-          defaultValue={currentUser.username}
-          name="emailAddress"
-          value={this.state.username}
-          InputProps={{ readOnly: true }}
-        />
-        <TextField
           required
           fullWidth
           className={classes.input}
-          label={type === 'COMMERCIAL' || type === 'ADMIN' ? 'Full Name' : 'Company\'s Name'}
+          label={type === 'RegisteredUser' || type === 'ADMIN' ? 'Full Name' : 'Company\'s Name'}
           type="text"
-          defaultValue={currentUser.fullname}
-          name="fullname"
-          value={this.state.fullname}
+          defaultValue={currentUser.name}
+          name="name"
+          value={this.state.name}
           onChange={this.handleChange}
         />
-        {type === 'COMMERCIAL' && (
-          <TextField
-            required
-            fullWidth
-            select
-            className={classes.input}
-            label="Gender"
-            name="gender"
-            value={this.state.gender}
-            onChange={this.handleChange}
-          >
-            <MenuItem key={0} value={0}>Male</MenuItem>
-            <MenuItem key={1} value={1}>Female</MenuItem>
-          </TextField>
-        )}
         <TextField
           required
           fullWidth
           className={classes.input}
-          label="Address"
+          label="Email Address"
+          type="text"
+          defaultValue={currentUser.email}
+          name="email"
+          value={this.state.email}
+          onChange={this.handleChange}
+        />
+        <TextField
+          required
+          fullWidth
+          className={classes.input}
+          label="Mailing Address"
           type="text"
           defaultValue={currentUser.address}
           name="address"
@@ -160,7 +131,7 @@ class UserProfile extends React.Component {
           label="Type"
           type="text"
           InputProps={{ readOnly: true }}
-          value={type === 'CA' ? 'CERTIFYING AUTHORITY' : currentUser.type}
+          value={type === 'CertificateAuthority' ? 'Certificate Authority' : type === 'RegisteredUser' ? 'Registered User' : currentUser.type}
         />
         <Button variant="outlined" color="secondary" className={classes.button} onClick={this.handleUpdateUser}>Update</Button>
         <Button variant="outlined" color="secondary" className={classes.button} onClick={handleChangePassword}>Change Password</Button>

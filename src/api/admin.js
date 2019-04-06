@@ -13,10 +13,11 @@ const getAllUsers = () => api
     { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
-const toggleActivity = (id) => api
-  .get(
-    '/toggleActivity',
-    { params: { id }, headers: { Authorisation: localStorage.getItem('token') } },
+const toggleActivity = data => api
+  .post(
+    '/setStatus',
+    { ...data },
+    { headers: { 'x-auth': localStorage.getItem('auth') } },
   );
 
 export default {
