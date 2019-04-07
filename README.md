@@ -10,7 +10,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
     - Start the rest server at port 3001
 1. Deploy Nodejs Server
     - Ensure you have downloaded Nodejs. If not, download it here https://nodejs.org/en/download/
-    - Download the Nodejs repo at https://github.com/quanle1994/IS4302-GoldChain onto your computer and unzip it.
+    - Download the Nodejs repo at https://github.com/quanle1994/2019_IS4302_Mon_4-6_G7_Backend onto your computer and unzip it.
     - Navigate to the extracted folder in command prompt (for Windows). For Mac and Linux, use the terminal
     - Run npm install
     - Run npm start
